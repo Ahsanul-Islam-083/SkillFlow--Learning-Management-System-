@@ -1,0 +1,25 @@
+{
+  "collectionName": "components_quiz_elements_questions",
+  "info": {
+    "displayName": "Question"
+  },
+  "options": {},
+  "attributes": {
+    "questionText": {
+      "type": "text",
+      "required": true
+    },
+    "options": {
+      "type": "json",
+      "required": true
+    },
+    "correctAnswerIndex": {
+      "type": "integer",
+      "required": true
+    },
+    "explanation": {
+      "type": "text"
+    }
+  },
+  "config": {}
+}
