@@ -630,6 +630,52 @@ export interface ApiLessonLesson extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiQuizSubmissionQuizSubmission
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'quiz_submissions';
+  info: {
+    displayName: 'QuizSubmission';
+    pluralName: 'quiz-submissions';
+    singularName: 'quiz-submission';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    isPassed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::quiz-submission.quiz-submission'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    quiz: Schema.Attribute.Relation<'manyToOne', 'api::quiz.quiz'> &
+      Schema.Attribute.Required;
+    score: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 100;
+          min: 0;
+        },
+        number
+      >;
+    student: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    > &
+      Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    userAnswers: Schema.Attribute.JSON & Schema.Attribute.Required;
+  };
+}
+
 export interface ApiQuizQuiz extends Struct.CollectionTypeSchema {
   collectionName: 'quizzes';
   info: {
@@ -653,6 +699,10 @@ export interface ApiQuizQuiz extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     questions: Schema.Attribute.Component<'quiz-elements.question', true> &
       Schema.Attribute.Required;
+    quiz_submissions: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::quiz-submission.quiz-submission'
+    >;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1148,6 +1198,10 @@ export interface PluginUsersPermissionsUser
       }>;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    quiz_submissions: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::quiz-submission.quiz-submission'
+    >;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
     role: Schema.Attribute.Relation<
       'manyToOne',
@@ -1180,6 +1234,7 @@ declare module '@strapi/strapi' {
       'api::course.course': ApiCourseCourse;
       'api::enrollment.enrollment': ApiEnrollmentEnrollment;
       'api::lesson.lesson': ApiLessonLesson;
+      'api::quiz-submission.quiz-submission': ApiQuizSubmissionQuizSubmission;
       'api::quiz.quiz': ApiQuizQuiz;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

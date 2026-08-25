@@ -31,6 +31,12 @@
       "component": "quiz-elements.question",
       "repeatable": true,
       "required": true
+    },
+    "quiz_submissions": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::quiz-submission.quiz-submission",
+      "mappedBy": "quiz"
     }
   }
 }
