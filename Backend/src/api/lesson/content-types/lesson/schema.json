@@ -43,6 +43,12 @@
       "target": "api::course.course",
       "required": true,
       "inversedBy": "lessons"
+    },
+    "enrollments": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::enrollment.enrollment",
+      "mappedBy": "completedLessons"
     }
   }
 }
