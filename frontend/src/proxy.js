@@ -11,6 +11,13 @@ export function proxy(request) {
   const isInstructor = role.includes("instructor") || role.includes("teacher");
   const isStudent = role.includes("student") || (!isAdmin && !isManager && !isInstructor);
 
+  // profile access control
+  if (pathname.startsWith("/profile")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login?redirect=/profile", request.url));
+    }
+  }
+
   // dashboard access control based on role
   if (pathname.startsWith("/dashboard")) {
     if (!token) {
@@ -52,5 +59,5 @@ export function proxy(request) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
+  matcher: ["/dashboard/:path*", "/profile", "/login", "/register"],
 };
