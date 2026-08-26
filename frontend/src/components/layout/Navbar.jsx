@@ -16,39 +16,37 @@ const Navbar = () => {
 
     const { user, role, logout, isAuthenticated } = useAuth();
 
-    const getDashboardRoute = () => {
-        switch (role) {
-            case "Admin":
-                return {
-                    path: "/dashboard/admin",
-                    label: "Admin Panel",
-                    icon: ShieldCheck,
-                    badgeColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
-                };
-            case "Content Manager":
-                return {
-                    path: "/dashboard/manager",
-                    label: "Manager Hub",
-                    icon: FileEdit,
-                    badgeColor: "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300"
-                };
-            case "Instructor":
-                return {
-                    path: "/dashboard/instructor",
-                    label: "Instructor Hub",
-                    icon: GraduationCap,
-                    badgeColor: "bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300"
-                };
-            case "Student":
-            default:
-                return {
-                    path: "/dashboard/student",
-                    label: "My Learning",
-                    icon: LayoutDashboard,
-                    badgeColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-                };
-        }
-    };
+   const getDashboardRoute = () => {
+    if (role === "Admin") {
+      return { 
+        path: "/dashboard/admin", 
+        label: "Admin Panel", 
+        icon: ShieldCheck, 
+        badgeColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300" 
+      };
+    } else if (role === "Content Manager") {
+      return { 
+        path: "/dashboard/manager", 
+        label: "Manager Hub", 
+        icon: FileEdit, 
+        badgeColor: "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300" 
+      };
+    } else if (role === "Instructor") {
+      return { 
+        path: "/dashboard/instructor", 
+        label: "Instructor Hub", 
+        icon: GraduationCap, 
+        badgeColor: "bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300" 
+      };
+    } else {
+      return { 
+        path: "/dashboard/student", 
+        label: "My Learning", 
+        icon: LayoutDashboard, 
+        badgeColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" 
+      };
+    }
+  };
 
     const dashboardInfo = getDashboardRoute();
     const DashboardIcon = dashboardInfo.icon;
