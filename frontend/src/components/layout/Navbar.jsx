@@ -58,7 +58,7 @@ const Navbar = () => {
     const DashboardIcon = dashboardInfo.icon;
 
     return (
-        <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 transition-colors">
+        <header className="sticky top-0 z-70 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 transition-colors">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 {/* logo */}
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl text-slate-900 dark:text-white">
@@ -72,7 +72,7 @@ const Navbar = () => {
 
                 {/* navigation links */}
                 <nav className="hidden md:flex items-center gap-8">
-                    <Link href="/" className="text-sm font-medium text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition">
+                    <Link href="/courses" className="text-sm font-medium text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition">
                         Courses
                     </Link>
                     <Link href="/blogs" className="text-sm font-medium text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition">

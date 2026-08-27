@@ -1,102 +1,48 @@
-"use client";
-
-import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, BookOpen, Clock, Layers, Star, ArrowRight, User } from "lucide-react";
+import { BookOpen, Layers, ArrowRight, User } from "lucide-react";
 
-const CourseCatalog = ({ initialCourses = [] }) => {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("All");
-    const [selectedLevel, setSelectedLevel] = useState("All");
+export default function CourseGrid({
+  courses = [],
+  eyebrow = "Featured Catalog",
+  title = "Explore All Courses",
+  viewAllHref = null,
+  className = "py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+}) {
+  const hasHeader = Boolean(eyebrow || title || viewAllHref);
 
-    // catalog list making
-    const categories = useMemo(() => {
-    const list = new Set(["All"]);
-    initialCourses.forEach((c) => {
-      if (c.category) list.add(c.category);
-    });
-    return Array.from(list);
-  }, [initialCourses]);
-
-//   live search and filter logic
-  const filteredCourses = useMemo(() => {
-    return initialCourses.filter((course) => {
-      const matchesSearch =
-        course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesCategory =
-        selectedCategory === "All" || course.category === selectedCategory;
-
-      const matchesLevel =
-        selectedLevel === "All" || course.level?.toLowerCase() === selectedLevel.toLowerCase();
-
-      return matchesSearch && matchesCategory && matchesLevel;
-    });
-  }, [initialCourses, searchTerm, selectedCategory, selectedLevel]);
-
-return (
-    <section id="courses" className="py-16 md:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-        <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            Featured Catalog
-          </span>
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
-            Explore All Courses
-          </h2>
-        </div>
-
-     
-        <div className="flex flex-wrap items-center gap-3">
-       
-          <div className="relative min-w-[240px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search course title..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-indigo-600 transition"
-            />
+  return (
+    <section className={className}>
+      {hasHeader && (
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+          <div>
+            {eyebrow && (
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                {eyebrow}
+              </span>
+            )}
+            {title && (
+              <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+                {title}
+              </h2>
+            )}
           </div>
 
-       
-          <select
-            value={selectedLevel}
-            onChange={(e) => setSelectedLevel(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs outline-none focus:ring-2 focus:ring-indigo-600 transition"
-          >
-            <option value="All">All Levels</option>
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
-          </select>
+          {viewAllHref && (
+            <Link
+              href={viewAllHref}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:gap-1.5 transition-all"
+            >
+              <span>View All Courses</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          )}
         </div>
-      </div>
+      )}
 
-   
-      <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-              selectedCategory === cat
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-  
-      {filteredCourses.length > 0 ? (
+      {courses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map((course) => {
+          {courses.map((course) => {
             const thumbnail =
               course.thumbnail?.url ||
               "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop";
@@ -169,6 +115,4 @@ return (
       )}
     </section>
   );
-};
-
-export default CourseCatalog;
+}

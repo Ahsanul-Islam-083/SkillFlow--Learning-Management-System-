@@ -95,7 +95,7 @@ export default function StudentDashboard() {
         title={`Welcome back, ${user?.username || "Learner"}! 👋`}
         subtitle="Continue your curriculum tracks and pick up right where you left off."
         actionText="Browse Full Catalog"
-        actionHref="/#courses"
+        actionHref="/courses"
         actionIcon={BookOpen}
       />
 
@@ -229,7 +229,7 @@ export default function StudentDashboard() {
             title="No Enrolled Courses Found"
             description="You have not enrolled in any learning tracks yet. Browse the course catalog to choose a track and start learning."
             actionText="Browse Course Catalog"
-            actionHref="/#courses"
+            actionHref="/courses"
           />
         )}
       </div>

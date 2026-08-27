@@ -129,7 +129,7 @@ export default function DashboardSidebar({
         },
         {
           label: "Browse Catalog",
-          href: "/#courses",
+          href: "/courses",
           icon: BookOpen,
           accent: "indigo",
         },
@@ -158,7 +158,7 @@ export default function DashboardSidebar({
       },
       {
         label: "Course Catalog",
-        href: "/#courses",
+        href: "/courses",
         icon: Compass,
         accent: "teal",
       },
@@ -308,9 +308,7 @@ export default function DashboardSidebar({
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
-                item.href === "/#courses"
-                  ? false
-                  : item.href === "/dashboard/manager"
+                item.href === "/dashboard/manager"
                   ? pathname === "/dashboard/manager"
                   : item.href === "/dashboard/instructor"
                   ? pathname === "/dashboard/instructor"
