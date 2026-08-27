@@ -24,7 +24,7 @@ export default function MarkdownRenderer({ content = "", className = "" }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          // ── Headings ──────────────────────────────────────────────────────
+          //  Headings 
           h1: ({ children }) => (
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight mt-8 mb-3">
               {children}
@@ -46,14 +46,14 @@ export default function MarkdownRenderer({ content = "", className = "" }) {
             </h4>
           ),
 
-          // ── Body text ─────────────────────────────────────────────────────
+          //  Body text ─
           p: ({ children }) => (
             <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed my-2.5">
               {children}
             </p>
           ),
 
-          // ── Inline formatting ─────────────────────────────────────────────
+          //  Inline formatting ─
           strong: ({ children }) => (
             <strong className="font-bold text-slate-900 dark:text-white">
               {children}
@@ -65,7 +65,7 @@ export default function MarkdownRenderer({ content = "", className = "" }) {
             </em>
           ),
 
-          // ── Link ──────────────────────────────────────────────────────────
+          //  Link 
           a: ({ href, children }) => (
             <a
               href={href}
@@ -77,14 +77,14 @@ export default function MarkdownRenderer({ content = "", className = "" }) {
             </a>
           ),
 
-          // ── Blockquote ────────────────────────────────────────────────────
+          //  Blockquote 
           blockquote: ({ children }) => (
             <blockquote className="p-4 my-3 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border-l-4 border-indigo-500 text-slate-700 dark:text-slate-300 italic text-sm">
               {children}
             </blockquote>
           ),
 
-          // ── Lists ─────────────────────────────────────────────────────────
+          //  Lists ─
           ul: ({ children }) => (
             <ul className="list-disc list-inside space-y-1.5 my-3 text-slate-700 dark:text-slate-300">
               {children}
@@ -101,12 +101,12 @@ export default function MarkdownRenderer({ content = "", className = "" }) {
             </li>
           ),
 
-          // ── Horizontal rule ───────────────────────────────────────────────
+          //  Horizontal rule ─
           hr: () => (
             <hr className="my-6 border-slate-200 dark:border-slate-800" />
           ),
 
-          // ── GFM table (bonus — not in old parser) ─────────────────────────
+          //  GFM table (bonus — not in old parser) ─
           table: ({ children }) => (
             <div className="my-4 overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
               <table className="w-full text-xs text-left">{children}</table>
@@ -134,7 +134,7 @@ export default function MarkdownRenderer({ content = "", className = "" }) {
             <td className="px-4 py-2.5 text-slate-700 dark:text-slate-300">{children}</td>
           ),
 
-          // ── Code — inline & fenced ────────────────────────────────────────
+          //  Code — inline & fenced 
           code: ({ inline, className: codeClassName, children }) => {
             // Inline code snippet (e.g. `variable`)
             if (inline) {
