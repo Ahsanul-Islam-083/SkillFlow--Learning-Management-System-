@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { BookOpen, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 const Footer = () => {
     const pathname = usePathname();
@@ -17,9 +18,14 @@ const Footer = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="md:col-span-2 space-y-4">
-                        <div className="flex items-center gap-2 text-white font-bold text-xl">
-                            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
-                                <BookOpen className="w-4 h-4" />
+                        <div className="flex items-center gap-2.5 text-white font-bold text-xl">
+                            <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                                <Image
+                                    src="/logosf.png"
+                                    alt="SkillFlow Logo"
+                                    fill
+                                    className="object-cover"
+                                />
                             </div>
                             SkillFlow LMS
                         </div>
@@ -34,7 +40,8 @@ const Footer = () => {
                     <div>
                         <h4 className="text-white text-sm font-semibold mb-3">Explore</h4>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/" className="hover:text-white transition">Course Catalog</Link></li>
+                            <li><Link href="/courses" className="hover:text-white transition">Course Catalog</Link></li>
+                            <li><Link href="/about" className="hover:text-white transition">About SkillFlow</Link></li>
                             <li><Link href="/blogs" className="hover:text-white transition">Tech Blog & Updates</Link></li>
                             <li><Link href="/login" className="hover:text-white transition">Portal Access</Link></li>
                         </ul>

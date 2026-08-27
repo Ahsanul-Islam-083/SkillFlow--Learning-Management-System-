@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -61,9 +62,15 @@ const Navbar = () => {
         <header className="sticky top-0 z-70 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 transition-colors">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 {/* logo */}
-                <Link href="/" className="flex items-center gap-2 font-bold text-xl text-slate-900 dark:text-white">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md">
-                        <BookOpen className="w-5 h-5" />
+                <Link href="/" className="flex items-center gap-2.5 font-bold text-xl text-slate-900 dark:text-white group">
+                    <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-xs flex-shrink-0">
+                        <Image
+                            src="/logosf.png"
+                            alt="SkillFlow Logo"
+                            fill
+                            className="object-cover"
+                            priority
+                        />
                     </div>
                     <span className="tracking-tight">
                         Skill<span className="text-indigo-600 dark:text-indigo-400">Flow</span>
@@ -74,6 +81,9 @@ const Navbar = () => {
                 <nav className="hidden md:flex items-center gap-8">
                     <Link href="/courses" className="text-sm font-medium text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition">
                         Courses
+                    </Link>
+                    <Link href="/about" className="text-sm font-medium text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition">
+                        About Us
                     </Link>
                     <Link href="/blogs" className="text-sm font-medium text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition">
                         Articles & News
