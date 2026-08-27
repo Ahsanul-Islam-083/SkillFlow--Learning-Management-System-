@@ -10,33 +10,20 @@ export const revalidate = 60;
 
 async function getHomeData() {
   try {
-    const [coursesRes, blogsRes, enrollmentsRes] = await Promise.all([
+    const [coursesRes, blogsRes] = await Promise.all([
       fetchAPI("/courses?populate=*"),
-      fetchAPI("/blogs?populate=*"), 
-      fetchAPI("/enrollments?populate[0]=course"),
+      fetchAPI("/blogs?populate=*"),
     ]);
 
     const courses = Array.isArray(coursesRes?.data) ? coursesRes.data : Array.isArray(coursesRes) ? coursesRes : [];
     const blogs = Array.isArray(blogsRes?.data) ? blogsRes.data : Array.isArray(blogsRes) ? blogsRes : [];
-    const enrollments = Array.isArray(enrollmentsRes?.data) ? enrollmentsRes.data : Array.isArray(enrollmentsRes) ? enrollmentsRes : [];
 
-    // Count enrollments per course by documentId / id
-    const enrollmentCountMap = {};
-    enrollments.forEach((e) => {
-      const courseId = e.course?.documentId || e.course?.id;
-      if (courseId) {
-        enrollmentCountMap[courseId] = (enrollmentCountMap[courseId] || 0) + 1;
-      }
-    });
-
-    // Sort all courses descending by enrollment count and take the first 3
+    // Sort by createdAt descending (newest first) with safe fallback, then take top 3
     const featuredCourses = [...courses]
       .sort((a, b) => {
-        const aId = a.documentId || a.id;
-        const bId = b.documentId || b.id;
-        const countA = enrollmentCountMap[aId] || 0;
-        const countB = enrollmentCountMap[bId] || 0;
-        return countB - countA;
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
       })
       .slice(0, 3);
 
