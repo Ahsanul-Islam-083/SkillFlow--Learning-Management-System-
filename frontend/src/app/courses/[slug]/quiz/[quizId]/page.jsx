@@ -2,26 +2,32 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { fetchAPI } from "@/lib/api";
-import { Clock, HelpCircle, CheckCircle2, AlertTriangle, ArrowRight, Loader2 } from "lucide-react";
+import { Clock, CheckCircle2, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 
 const LiveQuizPage = () => {
     const { slug, quizId } = useParams();
     const router = useRouter();
+    const { user, token } = useAuth();
 
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState({});
     const [timeLeft, setTimeLeft] = useState(300);
 
+    // 1. Fetch Quiz Data
     useEffect(() => {
         async function loadQuizData() {
             try {
                 const res = await fetchAPI(`/courses?filters[slug][$eq]=${slug}&populate[quizzes][populate]=*`);
                 const courses = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
                 if (courses.length > 0 && courses[0].quizzes) {
-                    const found = courses[0].quizzes.find((q) => String(q.id) === String(quizId)) || courses[0].quizzes[0];
+                    const found = courses[0].quizzes.find(
+                        (q) => String(q.id) === String(quizId) || String(q.documentId) === String(quizId)
+                    ) || courses[0].quizzes[0];
                     setQuiz(found);
                 }
             } catch (err) {
@@ -33,7 +39,7 @@ const LiveQuizPage = () => {
         if (slug) loadQuizData();
     }, [slug, quizId]);
 
-    // timer effect for countdown
+    // 2. Countdown Timer
     useEffect(() => {
         if (timeLeft <= 0) {
             handleSubmitQuiz();
@@ -43,46 +49,65 @@ const LiveQuizPage = () => {
         return () => clearInterval(timer);
     }, [timeLeft]);
 
-    const questions = quiz?.questions || [
-        {
-            id: 1,
-            question: "Which hook is used for side-effects in React?",
-            options: ["useState", "useEffect", "useContext", "useReducer"],
-            correctAnswer: 1,
-        },
-        {
-            id: 2,
-            question: "What is Next.js primary rendering mode for SEO?",
-            options: ["Client Side Rendering", "Server Side Rendering", "Pure Static", "WebGL"],
-            correctAnswer: 1,
-        }
-    ];
+    const questions = quiz?.questions || [];
 
     const handleSelectOption = (qIdx, optIdx) => {
         setSelectedAnswers((prev) => ({ ...prev, [qIdx]: optIdx }));
     };
 
-    const handleSubmitQuiz = () => {
-        // score calculation based on selected answers
-        let score = 0;
+    // 3. Grade Assessment & Persist to Strapi
+    const handleSubmitQuiz = async () => {
+        if (submitting) return;
+        setSubmitting(true);
+
+        let correctCount = 0;
         questions.forEach((q, idx) => {
             const correctIndex = q.correctAnswerIndex ?? q.correctAnswer ?? 0;
             if (selectedAnswers[idx] === correctIndex) {
-                score += 1;
+                correctCount += 1;
             }
         });
+
+        const totalQuestions = questions.length || 1;
+        const percentage = Math.round((correctCount / totalQuestions) * 100);
+        const isPassed = percentage >= 60;
 
         const resultData = {
             quizTitle: quiz?.title || "Course Assessment",
             totalQuestions: questions.length,
-            score: score,
-            percentage: Math.round((score / questions.length) * 100),
+            score: correctCount,
+            percentage: percentage,
+            isPassed: isPassed,
             selectedAnswers,
             questions,
+            submittedAt: new Date().toISOString(),
         };
 
-        // store results in local storage and redirect to results page
+        // Cache in localStorage for immediate display
         localStorage.setItem(`quiz_result_${quizId}`, JSON.stringify(resultData));
+
+        // Persist to Strapi quiz-submissions endpoint
+        if (user?.id && token && quiz) {
+            const quizDocId = quiz.documentId || quiz.id;
+            try {
+                await fetchAPI("/quiz-submissions", {
+                    method: "POST",
+                    token: token,
+                    body: {
+                        data: {
+                            score: percentage,
+                            isPassed: isPassed,
+                            userAnswers: selectedAnswers,
+                            student: user.id,
+                            quiz: quizDocId,
+                        },
+                    },
+                });
+            } catch (persistErr) {
+                console.warn("Strapi quiz-submission sync failed (cached locally):", persistErr);
+            }
+        }
+
         router.push(`/courses/${slug}/quiz/${quizId}/result`);
     };
 
@@ -94,20 +119,30 @@ const LiveQuizPage = () => {
         );
     }
 
+    if (!quiz || questions.length === 0) {
+        return (
+            <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
+                <AlertCircle className="w-10 h-10 text-amber-500" />
+                <p className="text-slate-600 dark:text-slate-400 font-semibold">No questions configured for this quiz.</p>
+            </div>
+        );
+    }
+
     const currentQ = questions[currentIndex];
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     const questionText = currentQ?.questionText || currentQ?.question || "Assessment Question";
+    const options = currentQ?.options || [];
 
     return (
         <div className="min-h-screen py-12 bg-slate-50 dark:bg-slate-950">
             <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-6">
 
-                {/* quiz header and timer */}
+                {/* Quiz Header & Countdown */}
                 <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                     <div>
                         <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                            Live Quiz Examination
+                            Live Assessment Examination
                         </span>
                         <h1 className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">
                             {quiz?.title || "Assessment"}
@@ -120,11 +155,11 @@ const LiveQuizPage = () => {
                     </div>
                 </div>
 
-                {/* question and option card */}
+                {/* Question & Options Card */}
                 <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
                     <div className="flex items-center justify-between text-xs text-slate-400">
                         <span>Question {currentIndex + 1} of {questions.length}</span>
-                        <span>Auto-Grading Enabled</span>
+                        <span>Auto-Grading Synchronized</span>
                     </div>
 
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white leading-snug">
@@ -132,7 +167,7 @@ const LiveQuizPage = () => {
                     </h2>
 
                     <div className="space-y-3">
-                        {currentQ.options.map((opt, optIdx) => {
+                        {options.map((opt, optIdx) => {
                             const isSelected = selectedAnswers[currentIndex] === optIdx;
 
                             return (
@@ -151,7 +186,7 @@ const LiveQuizPage = () => {
                         })}
                     </div>
 
-                    {/* navigation and submit button */}
+                    {/* Navigation & Submit Action */}
                     <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <button
                             disabled={currentIndex === 0}
@@ -170,10 +205,12 @@ const LiveQuizPage = () => {
                             </button>
                         ) : (
                             <button
+                                disabled={submitting}
                                 onClick={handleSubmitQuiz}
-                                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition"
+                                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs transition flex items-center gap-2"
                             >
-                                Submit Assessment
+                                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                                <span>{submitting ? "Grading & Saving..." : "Submit Assessment"}</span>
                             </button>
                         )}
                     </div>
