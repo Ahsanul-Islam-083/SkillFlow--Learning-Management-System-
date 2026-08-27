@@ -1,7 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BookOpen, ShieldCheck } from "lucide-react";
 
 const Footer = () => {
+    const pathname = usePathname();
+
+    // Do not render global Footer inside the dashboard workspace
+    if (pathname && pathname.startsWith("/dashboard")) {
+        return null;
+    }
+
     return (
         <footer className="bg-slate-900 text-slate-400 border-t border-slate-800 dark:bg-slate-950 dark:border-slate-900">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

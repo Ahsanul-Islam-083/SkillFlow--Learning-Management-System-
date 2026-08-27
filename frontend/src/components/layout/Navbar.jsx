@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import {
@@ -13,8 +14,13 @@ import {
 } from "lucide-react";
 
 const Navbar = () => {
-
+    const pathname = usePathname();
     const { user, role, logout, isAuthenticated } = useAuth();
+
+    // Do not render global Navbar inside the dashboard workspace
+    if (pathname && pathname.startsWith("/dashboard")) {
+        return null;
+    }
 
    const getDashboardRoute = () => {
     if (role === "Admin") {

@@ -20,7 +20,7 @@ export default function RoleBadge({ role = "Student", size = "sm", className = "
     Icon = ShieldCheck;
   } else if (norm.includes("manager") || norm.includes("content")) {
     style = "bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800";
-    label = "Content Manager";
+    label = "Manager";
     Icon = FileEdit;
   } else if (norm.includes("instructor") || norm.includes("teacher")) {
     style = "bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border-teal-200 dark:border-teal-800";

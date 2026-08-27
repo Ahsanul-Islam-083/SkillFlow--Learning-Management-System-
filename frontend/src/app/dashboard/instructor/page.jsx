@@ -72,151 +72,147 @@ export default function InstructorDashboard() {
   const totalQuizzes = courses.reduce((sum, c) => sum + (c.quizzes?.length || 0), 0);
 
   return (
-    <div className="min-h-screen py-10 md:py-14">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="space-y-8">
+      {/* Dashboard Banner */}
+      <DashboardBanner
+        eyebrow="Instructor Studio"
+        title="Instructor Dashboard 🎓"
+        subtitle="Manage curricula, publish lectures, and monitor student engagement."
+        actionText="Create New Track"
+        actionHref="/dashboard/instructor/courses/new"
+        actionIcon={PlusCircle}
+        gradient="from-teal-950 via-slate-900 to-slate-900 border border-teal-900/40"
+      />
 
-        {/* Dashboard Banner */}
-        <DashboardBanner
-          eyebrow="Instructor Studio"
-          title={`Instructor Dashboard 🎓`}
-          subtitle="Manage curricula, publish lectures, and monitor student engagement."
-          actionText="Create New Track"
-          actionHref="/dashboard/instructor/courses/new"
-          actionIcon={PlusCircle}
-          gradient="from-teal-950 via-slate-900 to-slate-900 border border-teal-900/40"
+      {/* Analytics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard
+          title="My Courses"
+          value={courses.length}
+          icon={BookOpen}
+          color="teal"
+          subtitle="Active authoring tracks"
         />
+        <StatCard
+          title="Total Lessons"
+          value={totalLessons}
+          icon={Layers}
+          color="indigo"
+          subtitle="Published lectures across tracks"
+        />
+        <StatCard
+          title="Quizzes Built"
+          value={totalQuizzes}
+          icon={BarChart3}
+          color="purple"
+          subtitle="MCQ assessments active"
+        />
+      </div>
 
-        {/* Analytics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard
-            title="My Courses"
-            value={courses.length}
-            icon={BookOpen}
-            color="teal"
-            subtitle="Active authoring tracks"
-          />
-          <StatCard
-            title="Total Lessons"
-            value={totalLessons}
-            icon={Layers}
-            color="indigo"
-            subtitle="Published lectures across tracks"
-          />
-          <StatCard
-            title="Quizzes Built"
-            value={totalQuizzes}
-            icon={BarChart3}
-            color="purple"
-            subtitle="MCQ assessments active"
-          />
+      {/* Course Authoring Tracks */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+            My Authoring Tracks ({courses.length})
+          </h2>
+          <Link
+            href="/dashboard/instructor/courses/new"
+            className="text-xs font-bold text-teal-600 dark:text-teal-400 hover:underline"
+          >
+            + Create Track
+          </Link>
         </div>
 
-        {/* Course Authoring Tracks */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-              My Authoring Tracks ({courses.length})
-            </h2>
-            <Link
-              href="/dashboard/instructor/courses/new"
-              className="text-xs font-bold text-teal-600 dark:text-teal-400 hover:underline"
-            >
-              + Create Track
-            </Link>
-          </div>
+        {courses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {courses.map((course) => {
+              const thumbnail =
+                course.thumbnailUrl ||
+                course.thumbnail?.url ||
+                "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop";
+              const cId = course.documentId || course.id;
 
-          {courses.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((course) => {
-                const thumbnail =
-                  course.thumbnailUrl ||
-                  course.thumbnail?.url ||
-                  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop";
-                const cId = course.documentId || course.id;
-
-                return (
-                  <div
-                    key={cId}
-                    className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="relative aspect-video bg-slate-100 dark:bg-slate-800">
-                        <Image src={thumbnail} alt={course.title} fill className="object-cover" />
-                        <span className="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-md bg-slate-900/80 backdrop-blur text-white uppercase">
-                          {course.level || "Beginner"}
-                        </span>
-                        <div className="absolute top-3 right-3">
-                          <StatusBadge status={course.isPublished !== false ? "Published" : "Draft"} size="sm" />
-                        </div>
-                      </div>
-
-                      <div className="p-6 space-y-3">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
-                          {course.category || "Web Development"}
-                        </span>
-                        <h3 className="font-bold text-base text-slate-900 dark:text-white line-clamp-2">
-                          {course.title}
-                        </h3>
-                        <p className="text-xs text-slate-500 line-clamp-2">
-                          {course.shortDescription || course.description}
-                        </p>
-
-                        <div className="flex items-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
-                          <span>{course.lessons?.length || 0} Lessons</span>
-                          <span>•</span>
-                          <span>{course.quizzes?.length || 0} Quizzes</span>
-                        </div>
+              return (
+                <div
+                  key={cId}
+                  className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="relative aspect-video bg-slate-100 dark:bg-slate-800">
+                      <Image src={thumbnail} alt={course.title} fill className="object-cover" />
+                      <span className="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-md bg-slate-900/80 backdrop-blur text-white uppercase">
+                        {course.level || "Beginner"}
+                      </span>
+                      <div className="absolute top-3 right-3">
+                        <StatusBadge status={course.isPublished !== false ? "Published" : "Draft"} size="sm" />
                       </div>
                     </div>
 
-                    <div className="p-6 pt-0 space-y-2">
-                      <div className="grid grid-cols-2 gap-2">
-                        <Link
-                          href={`/dashboard/instructor/courses/${cId}/edit`}
-                          className="py-2.5 px-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" /> Edit Syllabus
-                        </Link>
-                        <Link
-                          href={`/dashboard/instructor/courses/${cId}/progress`}
-                          className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition flex items-center justify-center gap-1.5"
-                        >
-                          <Users className="w-3.5 h-3.5" /> Learners
-                        </Link>
-                      </div>
+                    <div className="p-6 space-y-3">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+                        {course.category || "Web Development"}
+                      </span>
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white line-clamp-2">
+                        {course.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 line-clamp-2">
+                        {course.shortDescription || course.description}
+                      </p>
 
-                      <div className="flex items-center justify-between pt-1">
-                        <Link
-                          href={`/courses/${course.slug}`}
-                          target="_blank"
-                          className="text-[11px] text-slate-400 hover:text-slate-200 font-medium flex items-center gap-1"
-                        >
-                          <ExternalLink className="w-3 h-3" /> Preview Public Course
-                        </Link>
-
-                        <button
-                          onClick={() => setDeleteCourse(course)}
-                          className="text-[11px] text-red-500 hover:text-red-400 font-bold flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3 h-3" /> Delete
-                        </button>
+                      <div className="flex items-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <span>{course.lessons?.length || 0} Lessons</span>
+                        <span>•</span>
+                        <span>{course.quizzes?.length || 0} Quizzes</span>
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <EmptyState
-              icon={BookOpen}
-              title="No Courses Authored Yet"
-              description="You have not created any courses yet. Get started by building your first curriculum track."
-              actionText="Create New Track"
-              actionHref="/dashboard/instructor/courses/new"
-            />
-          )}
-        </div>
 
+                  <div className="p-6 pt-0 space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link
+                        href={`/dashboard/instructor/courses/${cId}/edit`}
+                        className="py-2.5 px-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" /> Edit Syllabus
+                      </Link>
+                      <Link
+                        href={`/dashboard/instructor/courses/${cId}/progress`}
+                        className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition flex items-center justify-center gap-1.5"
+                      >
+                        <Users className="w-3.5 h-3.5" /> Learners
+                      </Link>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <Link
+                        href={`/courses/${course.slug}`}
+                        target="_blank"
+                        className="text-[11px] text-slate-400 hover:text-slate-200 font-medium flex items-center gap-1"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Preview Public Course
+                      </Link>
+
+                      <button
+                        onClick={() => setDeleteCourse(course)}
+                        className="text-[11px] text-red-500 hover:text-red-400 font-bold flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3 h-3" /> Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState
+            icon={BookOpen}
+            title="No Courses Authored Yet"
+            description="You have not created any courses yet. Get started by building your first curriculum track."
+            actionText="Create New Track"
+            actionHref="/dashboard/instructor/courses/new"
+          />
+        )}
       </div>
 
       <ConfirmDeleteModal
@@ -227,7 +223,6 @@ export default function InstructorDashboard() {
         onConfirm={handleDeleteCourse}
         loading={deleting}
       />
-
     </div>
   );
 }
