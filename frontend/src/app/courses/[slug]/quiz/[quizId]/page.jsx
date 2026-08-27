@@ -196,7 +196,7 @@ export default function LiveQuizPage() {
 
                         {currentIndex < questions.length - 1 ? (
                             <button
-                                onClick={() => setCurrentIndex((prev) => prev - 1)}
+                                onClick={() => setCurrentIndex((prev) => prev + 1)}
                                 className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition flex items-center gap-1.5"
                             >
                                 Next Question <ArrowRight className="w-3.5 h-3.5" />
