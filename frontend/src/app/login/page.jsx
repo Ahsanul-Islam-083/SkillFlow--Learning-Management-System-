@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { Lock, Mail, Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { Lock, Mail, Loader2, AlertCircle, Sparkles, Eye, EyeOff } from "lucide-react";
 
 const LoginPage = () => {
-    const [identifier, setIdentifier] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login, loginWithGoogle } = useAuth();
@@ -32,7 +33,7 @@ const LoginPage = () => {
     setError("");
   };
 
-return (
+  return (
     <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
         <div className="text-center">
@@ -76,13 +77,21 @@ return (
             <div className="relative">
               <Lock className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm outline-none transition"
+                className="w-full pl-10 pr-11 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-sm outline-none transition"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition p-1"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
@@ -119,7 +128,7 @@ return (
           Continue with Google
         </button>
 
-        {/* কুইক টেস্ট ক্রেডেনশিয়াল বাটনসমূহ */}
+        {/* কুইক টেস্ট ক্রেডেনশিয়াল বাটনসমূহ */}
         <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs space-y-2">
           <div className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />

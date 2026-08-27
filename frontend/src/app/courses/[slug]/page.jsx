@@ -30,7 +30,7 @@ const CourseDetailPage = async ({ params }) => {
     }
 
     const thumbnail =
-        course.thumbnail?.url ||
+        course.thumbnailUrl ||
         "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop";
     const lessons = course.lessons || [];
     const quizzes = course.quizzes || [];

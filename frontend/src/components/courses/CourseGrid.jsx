@@ -43,8 +43,7 @@ export default function CourseGrid({
       {courses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => {
-            const thumbnail =
-              course.thumbnail?.url ||
+            const thumbnail = course.thumbnailUrl ||
               "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop";
             const lessonCount = course.lessons?.length || 0;
 

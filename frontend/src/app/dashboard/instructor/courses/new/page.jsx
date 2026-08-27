@@ -25,6 +25,7 @@ const NewCoursePage = () => {
         slug: "",
         category: "Web Development",
         level: "Beginner",
+        shortDescription: "",
         description: "",
         thumbnailUrl: "",
     });
@@ -62,7 +63,9 @@ const NewCoursePage = () => {
                     slug: formData.slug || formData.title.toLowerCase().replace(/\s+/g, "-"),
                     category: formData.category,
                     level: formData.level,
-                    description: formData.description,
+                    thumbnailUrl: formData.thumbnailUrl || "",
+                    shortDescription: formData.shortDescription.trim() || formData.description.slice(0, 160),
+                    description: formData.description.trim(),
                     instructor: user?.id, // link the current instructor
                     lessons: [],
                     quizzes: [],
@@ -75,7 +78,7 @@ const NewCoursePage = () => {
                 body: coursePayload,
             });
 
-            const createdId = res?.data?.id || res?.data?.documentId || res?.id;
+            const createdId = res?.data?.documentId || res?.documentId || res?.data?.id || res?.id;
 
             // If course creation is successful, redirect to the edit page
             if (createdId) {
@@ -164,11 +167,11 @@ const NewCoursePage = () => {
                                     className="mt-1.5 w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-teal-500 transition"
                                 >
                                     <option value="Web Development">Web Development</option>
-                                    <option value="Frontend Development">Frontend Development</option>
-                                    <option value="Backend Engineering">Backend Engineering</option>
-                                    <option value="UI/UX & Design">UI/UX & Design</option>
-                                    <option value="DevOps & Cloud">DevOps & Cloud</option>
+                                    <option value="App Development">App Development</option>
+                                    <option value="Data Science">Data Science</option>
+                                    <option value="UI/UX Design">UI/UX Design</option>
                                 </select>
+
                             </div>
                         </div>
 
@@ -199,6 +202,21 @@ const NewCoursePage = () => {
                                 />
                             </div>
                         </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                Short Description (Brief summary for cards & snippets) *
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                placeholder="A quick 1-2 sentence overview of what students will learn..."
+                                value={formData.shortDescription}
+                                onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
+                                className="mt-1.5 w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-teal-500 transition"
+                            />
+                        </div>
+
 
                         <div>
                             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">

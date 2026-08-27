@@ -63,7 +63,7 @@ export default function ManagerEditCoursePage() {
 
                 let courseData = null;
                 try {
-                    const res = await fetchAPI(filterQuery);
+                    const res = await fetchAPI(filterQuery, { token });
                     const list = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
                     if (list.length > 0) courseData = list[0];
                 } catch (e) {
@@ -71,7 +71,7 @@ export default function ManagerEditCoursePage() {
                 }
 
                 if (!courseData) {
-                    const singleRes = await fetchAPI(`/courses/${id}?${populateParam}`);
+                    const singleRes = await fetchAPI(`/courses/${id}?${populateParam}`, { token });
                     courseData = singleRes?.data || singleRes;
                 }
 

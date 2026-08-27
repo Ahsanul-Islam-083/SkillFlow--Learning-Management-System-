@@ -52,7 +52,7 @@ const EditCoursePage = () => {
 
       let data = null;
       try {
-        const res = await fetchAPI(filterQuery);
+        const res = await fetchAPI(filterQuery, { token });
         const list = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
         if (list.length > 0) {
           data = list[0];
@@ -62,7 +62,7 @@ const EditCoursePage = () => {
       }
 
       if (!data) {
-        const singleRes = await fetchAPI(`/courses/${id}?${populateParam}`);
+        const singleRes = await fetchAPI(`/courses/${id}?${populateParam}`, { token });
         data = singleRes?.data || singleRes;
       }
 
@@ -82,7 +82,7 @@ const EditCoursePage = () => {
 
   useEffect(() => {
     loadCourse();
-  }, [id]);
+  }, [id, token]);
 
   const handleAddLesson = (e) => {
     e.preventDefault();

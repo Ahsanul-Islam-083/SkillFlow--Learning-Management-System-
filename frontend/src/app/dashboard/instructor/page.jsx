@@ -23,15 +23,15 @@ import {
 } from "lucide-react";
 
 export default function InstructorDashboard() {
-  const { user, token } = useAuth();
+  const { user, token, loading: authLoading } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteCourse, setDeleteCourse] = useState(null);
   const [deleting, setDeleting] = useState(false);
-
   const loadInstructorCourses = async () => {
+    if (!token) return;
     try {
-      const res = await fetchAPI("/courses?populate=*");
+      const res = await fetchAPI("/courses?populate=*", { token });
       const myCourses = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
       setCourses(myCourses);
     } catch (err) {
@@ -40,10 +40,13 @@ export default function InstructorDashboard() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
-    loadInstructorCourses();
-  }, []);
+    if (token) {
+      loadInstructorCourses();
+    } else if (!authLoading) {
+      setLoading(false);
+    }
+  }, [token, authLoading]);
 
   const handleDeleteCourse = async () => {
     if (!deleteCourse) return;
