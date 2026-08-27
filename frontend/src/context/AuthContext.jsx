@@ -40,6 +40,15 @@ export function AuthProvider({ children }) {
     }
   }, [router]);
 
+  // logout function to clear cookies and reset state
+  const logout = useCallback(() => {
+    Cookies.remove(TOKEN_KEY);
+    Cookies.remove(ROLE_KEY);
+    setToken(null);
+    setUser(null);
+    router.push("/login");
+  }, [router]);
+
   // me Data fetcher to load user info based on token
   const loadUser = useCallback(async (authToken) => {
     try {
@@ -55,7 +64,7 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [logout]);
 
   useEffect(() => {
     const storedToken = Cookies.get(TOKEN_KEY);
@@ -156,15 +165,6 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  // logout function to clear cookies and reset state
-  const logout = () => {
-    Cookies.remove(TOKEN_KEY);
-    Cookies.remove(ROLE_KEY);
-    setToken(null);
-    setUser(null);
-    router.push("/login");
   };
 
   return (

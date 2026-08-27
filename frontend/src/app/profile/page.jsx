@@ -133,7 +133,7 @@ const ProfilePage = () => {
 
           <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 bg-slate-50 dark:bg-slate-800/60 px-4 py-2 rounded-xl border border-slate-200/60 dark:border-slate-800">
             <Calendar className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <span>Member since: {new Date(user.createdAt || Date.now()).toLocaleDateString()}</span>
+            <span>Member since: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Active Member"}</span>
           </div>
         </div>
 

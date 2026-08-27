@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { fetchAPI } from "@/lib/api";
+import PageLoader from "@/components/common/PageLoader";
 import {
     Play,
     CheckCircle,
@@ -17,12 +18,11 @@ import {
     X,
     Loader2,
     Lock,
-    ShieldAlert,
     BookOpen,
     Sparkles
 } from "lucide-react";
 
-const CourseLearningPlayer = () => {
+export default function CourseLearningPlayer() {
     const { slug } = useParams();
     const router = useRouter();
     const { user, role, token, loading: authLoading } = useAuth();
@@ -36,7 +36,6 @@ const CourseLearningPlayer = () => {
     const [enrolling, setEnrolling] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    // Local storage cache key
     const storageKey = `sf_progress_${user?.id || user?.email || "guest"}_${slug}`;
 
     // 1. Load course details and verify enrollment status
@@ -51,7 +50,6 @@ const CourseLearningPlayer = () => {
             }
 
             try {
-                // Fetch course curriculum
                 const res = await fetchAPI(`/courses?filters[slug][$eq]=${slug}&populate=*`);
                 const courses = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
 
@@ -59,7 +57,6 @@ const CourseLearningPlayer = () => {
                     const foundCourse = courses[0];
                     setCourse(foundCourse);
 
-                    // Admins, Content Managers, and the Course Instructor have staff bypass
                     const userRole = (role || "").toLowerCase();
                     const isStaffOrInstructor =
                         userRole.includes("admin") ||
@@ -90,7 +87,6 @@ const CourseLearningPlayer = () => {
                                 localStorage.setItem(storageKey, JSON.stringify(Array.from(remoteCompleted)));
                             }
                         } else if (isStaffOrInstructor) {
-                            // Staff bypass allows course preview even without enrollment
                             setIsEnrolled(true);
                         } else {
                             setIsEnrolled(false);
@@ -130,7 +126,7 @@ const CourseLearningPlayer = () => {
         }
     }, [slug, isEnrolled, storageKey, completedLessons.size]);
 
-    // 3. Handle 1-Click Instant Enrollment on the Lock Screen
+    // 3. Instant 1-Click Enrollment
     const handleInstantEnroll = async () => {
         if (!user || !token || !course) {
             router.push(`/login?redirect=/courses/${slug}/learn`);
@@ -166,7 +162,7 @@ const CourseLearningPlayer = () => {
         }
     };
 
-    // 4. Toggle lesson completion and sync with Strapi
+    // 4. Toggle lesson completion & sync to Strapi
     const toggleCompleteAndNext = async (lessonIdentifier) => {
         const updated = new Set(completedLessons);
         if (updated.has(lessonIdentifier)) {
@@ -227,11 +223,7 @@ const CourseLearningPlayer = () => {
     };
 
     if (loading || authLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
-            </div>
-        );
+        return <PageLoader color="text-indigo-600 dark:text-indigo-400" message="Loading curriculum player..." minHeight="min-h-screen" />;
     }
 
     if (!course) {
@@ -245,9 +237,9 @@ const CourseLearningPlayer = () => {
         );
     }
 
-
-    // ENROLLMENT GATE LOCK SCREEN (Shown when student is NOT enrolled)
-
+    // ─────────────────────────────────────────────────────────────
+    // 🔒 ENROLLMENT GATE LOCK SCREEN
+    // ─────────────────────────────────────────────────────────────
     if (!isEnrolled) {
         const thumbnail =
             course.thumbnailUrl ||
@@ -307,9 +299,9 @@ const CourseLearningPlayer = () => {
         );
     }
 
-
-    // FULL COURSE LEARNING PLAYER (When enrolled / authorized)
-
+    // ─────────────────────────────────────────────────────────────
+    // 🔓 FULL COURSE LEARNING PLAYER
+    // ─────────────────────────────────────────────────────────────
     const lessons = course.lessons || [];
     const quizzes = course.quizzes || [];
     const currentLesson = lessons[currentLessonIndex] || null;
@@ -363,7 +355,7 @@ const CourseLearningPlayer = () => {
             {/* Main Player + Sidebar Layout */}
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
 
-                {/* Left: Video Player & Lecture Notes */}
+                {/* Left: Video Player & Notes */}
                 <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
                     {currentLesson ? (
                         <div className="max-w-4xl mx-auto space-y-6">
@@ -398,7 +390,7 @@ const CourseLearningPlayer = () => {
                                 )}
                             </div>
 
-                            {/* Lesson Title and Completion Action */}
+                            {/* Lesson Title & Completion Action */}
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-slate-900 border border-slate-800">
                                 <div>
                                     <span className="text-xs font-bold text-indigo-400">
@@ -429,7 +421,7 @@ const CourseLearningPlayer = () => {
                                 </button>
                             </div>
 
-                            {/* Lesson Text Notes */}
+                            {/* Lesson Notes */}
                             {currentLesson.content && (
                                 <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
                                     <h3 className="text-sm font-bold text-slate-200">Lecture Notes & Summary</h3>
@@ -526,6 +518,4 @@ const CourseLearningPlayer = () => {
             </div>
         </div>
     );
-};
-
-export default CourseLearningPlayer;
+}

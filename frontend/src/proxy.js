@@ -11,20 +11,20 @@ export function proxy(request) {
   const isInstructor = role.includes("instructor") || role.includes("teacher");
   const isStudent = role.includes("student") || (!isAdmin && !isManager && !isInstructor);
 
-  // profile access control
+  // Profile access control
   if (pathname.startsWith("/profile")) {
     if (!token) {
       return NextResponse.redirect(new URL("/login?redirect=/profile", request.url));
     }
   }
 
-  // dashboard access control based on role
+  // Dashboard access control based on role
   if (pathname.startsWith("/dashboard")) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // dashboard redirect based on role if accessing /dashboard root
+    // Dashboard root redirect based on role
     if (pathname === "/dashboard" || pathname === "/dashboard/") {
       if (isAdmin) return NextResponse.redirect(new URL("/dashboard/admin", request.url));
       if (isManager) return NextResponse.redirect(new URL("/dashboard/manager", request.url));
@@ -32,7 +32,7 @@ export function proxy(request) {
       return NextResponse.redirect(new URL("/dashboard/student", request.url));
     }
 
-    // role-based specific dashboard permission check
+    // Role-based specific dashboard permission check
     if (pathname.startsWith("/dashboard/admin") && !isAdmin) {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
@@ -47,7 +47,7 @@ export function proxy(request) {
     }
   }
 
-  // redirect logged-in users away from login/register pages
+  // Redirect logged-in users away from login/register pages
   if ((pathname === "/login" || pathname === "/register") && token) {
     if (isAdmin) return NextResponse.redirect(new URL("/dashboard/admin", request.url));
     if (isManager) return NextResponse.redirect(new URL("/dashboard/manager", request.url));
@@ -61,4 +61,3 @@ export function proxy(request) {
 export const config = {
   matcher: ["/dashboard/:path*", "/profile/:path*", "/profile", "/login", "/register"],
 };
-

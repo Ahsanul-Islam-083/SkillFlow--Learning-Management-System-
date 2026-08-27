@@ -5,6 +5,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { fetchAPI } from "@/lib/api";
+import DashboardBanner from "@/components/dashboard/DashboardBanner";
+import StatCard from "@/components/dashboard/StatCard";
+import StatusBadge from "@/components/common/StatusBadge";
+import EmptyState from "@/components/common/EmptyState";
+import ConfirmDeleteModal from "@/components/common/ConfirmDeleteModal";
+import PageLoader from "@/components/common/PageLoader";
 import {
   PlusCircle,
   BookOpen,
@@ -13,182 +19,215 @@ import {
   Edit3,
   BarChart3,
   ExternalLink,
-  Loader2
+  Trash2
 } from "lucide-react";
 
-const InstructorDashboard = () => {
-
-  const { user } = useAuth();
+export default function InstructorDashboard() {
+  const { user, token } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteCourse, setDeleteCourse] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
-useEffect(() => {
-    async function loadInstructorCourses() {
-      try {
-        
-        const res = await fetchAPI("/courses?populate=*");
-        const myCourses = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-        setCourses(myCourses);
-      } catch (err) {
-        console.error("Failed to load instructor courses:", err);
-      } finally {
-        setLoading(false);
-      }
+  const loadInstructorCourses = async () => {
+    try {
+      const res = await fetchAPI("/courses?populate=*");
+      const myCourses = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+      setCourses(myCourses);
+    } catch (err) {
+      console.error("Failed to load instructor courses:", err);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadInstructorCourses();
   }, []);
 
+  const handleDeleteCourse = async () => {
+    if (!deleteCourse) return;
+    setDeleting(true);
+    try {
+      const targetId = deleteCourse.documentId || deleteCourse.id;
+      await fetchAPI(`/courses/${targetId}`, {
+        method: "DELETE",
+        token,
+      });
+      setCourses((prev) => prev.filter((c) => (c.documentId || c.id) !== targetId));
+      setDeleteCourse(null);
+    } catch (err) {
+      console.error("Failed to delete course:", err);
+      alert(err?.message || "Failed to delete course track.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
-    return (
-      <div className="min-h-[70vh] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-teal-600 dark:text-teal-400" />
-      </div>
-    );
+    return <PageLoader color="text-teal-600 dark:text-teal-400" message="Loading instructor workspace..." />;
   }
 
   const totalLessons = courses.reduce((sum, c) => sum + (c.lessons?.length || 0), 0);
+  const totalQuizzes = courses.reduce((sum, c) => sum + (c.quizzes?.length || 0), 0);
 
   return (
     <div className="min-h-screen py-10 md:py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
-     
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-teal-950 via-slate-900 to-slate-900 border border-teal-900/40 text-white shadow-md">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-teal-400">
-              Instructor Studio
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
-              Instructor Dashboard 🎓
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1">
-              Manage curricula, publish lectures, and monitor student engagement.
-            </p>
-          </div>
-          <Link
-            href="/dashboard/instructor/courses/new"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition shadow-sm w-fit"
-          >
-            <PlusCircle className="w-4 h-4" /> Create New Track
-          </Link>
-        </div>
+        {/* Dashboard Banner */}
+        <DashboardBanner
+          eyebrow="Instructor Studio"
+          title={`Instructor Dashboard 🎓`}
+          subtitle="Manage curricula, publish lectures, and monitor student engagement."
+          actionText="Create New Track"
+          actionHref="/dashboard/instructor/courses/new"
+          actionIcon={PlusCircle}
+          gradient="from-teal-950 via-slate-900 to-slate-900 border border-teal-900/40"
+        />
 
-      
+        {/* Analytics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-              <BookOpen className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">My Authored Courses</p>
-              <p className="text-xl font-bold text-slate-900 dark:text-white">{courses.length}</p>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-              <Layers className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Lectures</p>
-              <p className="text-xl font-bold text-slate-900 dark:text-white">{totalLessons}</p>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-              <Users className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Enrolled Students</p>
-              <p className="text-xl font-bold text-slate-900 dark:text-white">Active</p>
-            </div>
-          </div>
+          <StatCard
+            title="My Courses"
+            value={courses.length}
+            icon={BookOpen}
+            color="teal"
+            subtitle="Active authoring tracks"
+          />
+          <StatCard
+            title="Total Lessons"
+            value={totalLessons}
+            icon={Layers}
+            color="indigo"
+            subtitle="Published lectures across tracks"
+          />
+          <StatCard
+            title="Quizzes Built"
+            value={totalQuizzes}
+            icon={BarChart3}
+            color="purple"
+            subtitle="MCQ assessments active"
+          />
         </div>
 
-        {/* course list */}
+        {/* Course Authoring Tracks */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Manage My Courses
+              My Authoring Tracks ({courses.length})
             </h2>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {courses.length} Course(s) Total
-            </span>
+            <Link
+              href="/dashboard/instructor/courses/new"
+              className="text-xs font-bold text-teal-600 dark:text-teal-400 hover:underline"
+            >
+              + Create Track
+            </Link>
           </div>
 
           {courses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {courses.map((course) => {
                 const thumbnail =
+                  course.thumbnailUrl ||
                   course.thumbnail?.url ||
                   "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop";
-                const lessonCount = course.lessons?.length || 0;
+                const cId = course.documentId || course.id;
 
                 return (
                   <div
-                    key={course.id || course.slug}
-                    className="group bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm flex flex-col justify-between"
+                    key={cId}
+                    className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm flex flex-col justify-between"
                   >
                     <div>
                       <div className="relative aspect-video bg-slate-100 dark:bg-slate-800">
-                        <Image src={thumbnail} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <Image src={thumbnail} alt={course.title} fill className="object-cover" />
                         <span className="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-md bg-slate-900/80 backdrop-blur text-white uppercase">
                           {course.level || "Beginner"}
                         </span>
+                        <div className="absolute top-3 right-3">
+                          <StatusBadge status={course.isPublished !== false ? "Published" : "Draft"} size="sm" />
+                        </div>
                       </div>
 
-                      <div className="p-5 space-y-2">
-                        <div className="flex items-center justify-between text-xs text-teal-600 dark:text-teal-400 font-semibold">
-                          <span>{course.category || "Development"}</span>
-                          <span className="text-slate-400">{lessonCount} Lectures</span>
-                        </div>
+                      <div className="p-6 space-y-3">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+                          {course.category || "Web Development"}
+                        </span>
                         <h3 className="font-bold text-base text-slate-900 dark:text-white line-clamp-2">
                           {course.title}
                         </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
-                          {course.description}
+                        <p className="text-xs text-slate-500 line-clamp-2">
+                          {course.shortDescription || course.description}
                         </p>
+
+                        <div className="flex items-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
+                          <span>{course.lessons?.length || 0} Lessons</span>
+                          <span>•</span>
+                          <span>{course.quizzes?.length || 0} Quizzes</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="p-5 pt-0 grid grid-cols-2 gap-2">
-                      <Link
-                        href={`/dashboard/instructor/courses/${course.documentId || course.id}/edit`}
-                        className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition flex items-center justify-center gap-1.5"
-                      >
-                        <Edit3 className="w-3.5 h-3.5 text-teal-500" /> Edit Track
-                      </Link>
+                    <div className="p-6 pt-0 space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <Link
+                          href={`/dashboard/instructor/courses/${cId}/edit`}
+                          className="py-2.5 px-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" /> Edit Syllabus
+                        </Link>
+                        <Link
+                          href={`/dashboard/instructor/courses/${cId}/progress`}
+                          className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition flex items-center justify-center gap-1.5"
+                        >
+                          <Users className="w-3.5 h-3.5" /> Learners
+                        </Link>
+                      </div>
 
-                      <Link
-                        href={`/dashboard/instructor/courses/${course.documentId || course.id}/progress`}
-                        className="py-2.5 px-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5"
-                      >
-                        <BarChart3 className="w-3.5 h-3.5" /> Progress
-                      </Link>
+                      <div className="flex items-center justify-between pt-1">
+                        <Link
+                          href={`/courses/${course.slug}`}
+                          target="_blank"
+                          className="text-[11px] text-slate-400 hover:text-slate-200 font-medium flex items-center gap-1"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Preview Public Course
+                        </Link>
+
+                        <button
+                          onClick={() => setDeleteCourse(course)}
+                          className="text-[11px] text-red-500 hover:text-red-400 font-bold flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3 h-3" /> Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-              <BookOpen className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">No Courses Created Yet</h3>
-              <Link
-                href="/dashboard/instructor/courses/new"
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-500 text-slate-950 font-bold text-xs"
-              >
-                <PlusCircle className="w-4 h-4" /> Create Your First Course
-              </Link>
-            </div>
+            <EmptyState
+              icon={BookOpen}
+              title="No Courses Authored Yet"
+              description="You have not created any courses yet. Get started by building your first curriculum track."
+              actionText="Create New Track"
+              actionHref="/dashboard/instructor/courses/new"
+            />
           )}
         </div>
 
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteCourse)}
+        title="Delete Course Track?"
+        message={`Are you sure you want to delete "${deleteCourse?.title}"? All associated lessons and quizzes will be removed.`}
+        onClose={() => setDeleteCourse(null)}
+        onConfirm={handleDeleteCourse}
+        loading={deleting}
+      />
+
     </div>
   );
-};
-
-export default InstructorDashboard;
+}

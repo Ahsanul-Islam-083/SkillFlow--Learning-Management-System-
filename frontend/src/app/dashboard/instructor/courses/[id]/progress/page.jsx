@@ -5,285 +5,221 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { fetchAPI } from "@/lib/api";
+import SubpageHeader from "@/components/dashboard/SubpageHeader";
 import StatusBadge from "@/components/common/StatusBadge";
 import StatCard from "@/components/dashboard/StatCard";
+import ProgressBar from "@/components/common/ProgressBar";
+import EmptyState from "@/components/common/EmptyState";
+import PageLoader from "@/components/common/PageLoader";
 import {
-    ArrowLeft,
-    Users,
-    CheckCircle2,
-    Clock,
-    Award,
-    BookOpen,
-    Loader2,
-    Search
+  Users,
+  CheckCircle2,
+  Clock,
+  Award,
+  BookOpen,
+  Search
 } from "lucide-react";
 
-const CourseProgressPage = () => {
-    const { id } = useParams();
-    const { token } = useAuth();
+export default function CourseProgressPage() {
+  const { id } = useParams();
+  const { token } = useAuth();
 
-    const [course, setCourse] = useState(null);
-    const [enrollments, setEnrollments] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
+  const [course, setCourse] = useState(null);
+  const [enrollments, setEnrollments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        async function loadCourseAndLearners() {
-            if (!id) return;
-            try {
-                const isNumeric = /^\d+$/.test(id);
-                const filterQuery = isNumeric
-                    ? `/courses?filters[$or][0][id][$eq]=${id}&filters[$or][1][documentId][$eq]=${id}&filters[$or][2][slug][$eq]=${id}&populate=*`
-                    : `/courses?filters[$or][0][documentId][$eq]=${id}&filters[$or][1][slug][$eq]=${id}&populate=*`;
+  useEffect(() => {
+    async function loadCourseAndLearners() {
+      if (!id) return;
+      try {
+        const isNumeric = /^\d+$/.test(id);
+        const filterQuery = isNumeric
+          ? `/courses?filters[$or][0][id][$eq]=${id}&filters[$or][1][documentId][$eq]=${id}&filters[$or][2][slug][$eq]=${id}&populate=*`
+          : `/courses?filters[$or][0][documentId][$eq]=${id}&filters[$or][1][slug][$eq]=${id}&populate=*`;
 
-                let courseData = null;
-                try {
-                    const res = await fetchAPI(filterQuery);
-                    const list = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-                    if (list.length > 0) {
-                        courseData = list[0];
-                    }
-                } catch (filterErr) {
-                    console.warn("Filtered course query failed, attempting direct fetch:", filterErr);
-                }
-
-                if (!courseData) {
-                    const singleRes = await fetchAPI(`/courses/${id}?populate=*`);
-                    courseData = singleRes?.data || singleRes;
-                }
-
-                if (courseData) {
-                    setCourse(courseData);
-
-                    // Fetch real enrolled students from Strapi
-                    const courseDocId = courseData.documentId || courseData.id;
-                    try {
-                        const enrollRes = await fetchAPI(
-                            `/enrollments?filters[course][documentId][$eq]=${courseDocId}&populate[0]=student&populate[1]=completedLessons`,
-                            { token }
-                        );
-                        let enrollList = Array.isArray(enrollRes?.data) ? enrollRes.data : Array.isArray(enrollRes) ? enrollRes : [];
-
-                        // Fallback to numeric course id if empty
-                        if (enrollList.length === 0 && courseData.id) {
-                            const fallbackRes = await fetchAPI(
-                                `/enrollments?filters[course][id][$eq]=${courseData.id}&populate[0]=student&populate[1]=completedLessons`,
-                                { token }
-                            );
-                            enrollList = Array.isArray(fallbackRes?.data) ? fallbackRes.data : Array.isArray(fallbackRes) ? fallbackRes : [];
-                        }
-
-                        setEnrollments(enrollList);
-                    } catch (enrollErr) {
-                        console.warn("Failed to fetch enrollments for course:", enrollErr);
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to load progress details:", err);
-            } finally {
-                setLoading(false);
-            }
+        let courseData = null;
+        try {
+          const res = await fetchAPI(filterQuery);
+          const list = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+          if (list.length > 0) courseData = list[0];
+        } catch (filterErr) {
+          console.warn("Filtered course query failed:", filterErr);
         }
-        loadCourseAndLearners();
-    }, [id, token]);
 
-    if (loading) {
-        return (
-            <div className="min-h-[70vh] flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-teal-600 dark:text-teal-400" />
-            </div>
-        );
+        if (!courseData) {
+          const singleRes = await fetchAPI(`/courses/${id}?populate=*`);
+          courseData = singleRes?.data || singleRes;
+        }
+
+        if (courseData) {
+          setCourse(courseData);
+          const courseDocId = courseData.documentId || courseData.id;
+          try {
+            const enrollRes = await fetchAPI(
+              `/enrollments?filters[course][documentId][$eq]=${courseDocId}&populate[0]=student&populate[1]=completedLessons`,
+              { token }
+            );
+            let enrollList = Array.isArray(enrollRes?.data) ? enrollRes.data : Array.isArray(enrollRes) ? enrollRes : [];
+
+            if (enrollList.length === 0 && courseData.id) {
+              const fallbackRes = await fetchAPI(
+                `/enrollments?filters[course][id][$eq]=${courseData.id}&populate[0]=student&populate[1]=completedLessons`,
+                { token }
+              );
+              enrollList = Array.isArray(fallbackRes?.data) ? fallbackRes.data : Array.isArray(fallbackRes) ? fallbackRes : [];
+            }
+
+            setEnrollments(enrollList);
+          } catch (enrollErr) {
+            console.warn("Failed to fetch enrollments for course:", enrollErr);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load progress details:", err);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    const totalStudents = enrollments.length;
-    const completedStudents = enrollments.filter((e) => e.isCompleted || (e.progress || 0) >= 100).length;
-    const inProgressStudents = totalStudents - completedStudents;
-    const avgProgress = totalStudents > 0
-        ? Math.round(enrollments.reduce((acc, e) => acc + (e.progress || 0), 0) / totalStudents)
-        : 0;
+    loadCourseAndLearners();
+  }, [id, token]);
 
-    const filteredEnrollments = enrollments.filter((e) => {
-        const username = e.student?.username || "";
-        const email = e.student?.email || "";
-        return (
-            username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            email.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    });
+  if (loading) {
+    return <PageLoader color="text-teal-600 dark:text-teal-400" message="Loading learner progress..." />;
+  }
 
-    const totalLessonsCount = course?.lessons?.length || 0;
+  const totalStudents = enrollments.length;
+  const completedStudents = enrollments.filter((e) => e.isCompleted || (e.progress || 0) >= 100).length;
+  const inProgressStudents = totalStudents - completedStudents;
+  const avgProgress =
+    totalStudents > 0
+      ? Math.round(enrollments.reduce((acc, e) => acc + (e.progress || 0), 0) / totalStudents)
+      : 0;
 
+  const filteredEnrollments = enrollments.filter((e) => {
+    const username = e.student?.username || "";
+    const email = e.student?.email || "";
     return (
-        <div className="min-h-screen py-10 md:py-14">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <Link
-                            href="/dashboard/instructor"
-                            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"
-                        >
-                            <ArrowLeft className="w-4 h-4" />
-                        </Link>
-                        <div>
-                            <span className="text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
-                                Student Performance Analytics
-                            </span>
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-0.5">
-                                {course?.title || "Course Track"}
-                            </h1>
-                        </div>
-                    </div>
-
-                    <Link
-                        href={`/dashboard/instructor/courses/${course?.documentId || course?.id || id}/edit`}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition shadow-sm w-fit"
-                    >
-                        <BookOpen className="w-4 h-4" /> Edit Curriculum
-                    </Link>
-                </div>
-
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard
-                        title="Enrolled Learners"
-                        value={totalStudents}
-                        icon={Users}
-                        color="teal"
-                        subtitle="Active students in course"
-                    />
-                    <StatCard
-                        title="Completed Course"
-                        value={completedStudents}
-                        icon={Award}
-                        color="emerald"
-                        subtitle={`${completedStudents} certificate eligible`}
-                    />
-                    <StatCard
-                        title="In Progress"
-                        value={inProgressStudents}
-                        icon={Clock}
-                        color="indigo"
-                        subtitle="Currently learning curriculum"
-                    />
-                    <StatCard
-                        title="Avg Completion"
-                        value={`${avgProgress}%`}
-                        icon={CheckCircle2}
-                        color="purple"
-                        subtitle="Platform cohort average"
-                    />
-                </div>
-
-                {/* Learner Table Card */}
-                <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <h2 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                                <Users className="w-5 h-5 text-teal-500" />
-                                Enrolled Learners Progress
-                            </h2>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                Live progress tracking synchronized with lesson completion
-                            </p>
-                        </div>
-
-                        <div className="relative min-w-[220px]">
-                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Search learner name..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-teal-500 transition"
-                            />
-                        </div>
-                    </div>
-
-                    {filteredEnrollments.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-xs">
-                                <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider">
-                                    <tr>
-                                        <th className="pb-3 pl-2">Learner</th>
-                                        <th className="pb-3">Status</th>
-                                        <th className="pb-3">Lectures Done</th>
-                                        <th className="pb-3">Progress Bar</th>
-                                        <th className="pb-3 pr-2 text-right">Completion</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                    {filteredEnrollments.map((enrollment, idx) => {
-                                        const student = enrollment.student || {};
-                                        const progress = enrollment.progress || 0;
-                                        const isCompleted = enrollment.isCompleted || progress >= 100;
-                                        const completedCount = enrollment.completedLessons?.length || 0;
-
-                                        return (
-                                            <tr
-                                                key={enrollment.documentId || enrollment.id || idx}
-                                                className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition"
-                                            >
-                                                <td className="py-4 pl-2">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold text-xs">
-                                                            {student.username ? student.username.slice(0, 2).toUpperCase() : "ST"}
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-bold text-slate-900 dark:text-white">
-                                                                {student.username || "Enrolled Student"}
-                                                            </p>
-                                                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                                                                {student.email || "No email linked"}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="py-4">
-                                                    <StatusBadge
-                                                        status={isCompleted ? "Completed" : "In Progress"}
-                                                        size="sm"
-                                                    />
-                                                </td>
-                                                <td className="py-4 font-semibold text-slate-700 dark:text-slate-300">
-                                                    {completedCount} of {totalLessonsCount} lectures
-                                                </td>
-                                                <td className="py-4 min-w-[140px]">
-                                                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                                                        <div
-                                                            className={`h-full rounded-full transition-all duration-500 ${
-                                                                isCompleted ? "bg-emerald-500" : "bg-teal-500"
-                                                            }`}
-                                                            style={{ width: `${progress}%` }}
-                                                        />
-                                                    </div>
-                                                </td>
-                                                <td className="py-4 pr-2 text-right font-black text-slate-900 dark:text-white">
-                                                    {progress}%
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <div className="text-center py-16 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800">
-                            <Users className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-                            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                                No Enrolled Learners Found
-                            </h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-                                Students who enroll and make progress in this track will automatically show up in this live analytics table.
-                            </p>
-                        </div>
-                    )}
-                </div>
-
-            </div>
-        </div>
+      username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      email.toLowerCase().includes(searchTerm.toLowerCase())
     );
-};
+  });
 
-export default CourseProgressPage;
+  const totalLessonsCount = course?.lessons?.length || 0;
+
+  return (
+    <div className="min-h-screen py-10 md:py-14">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+
+        {/* Subpage Header */}
+        <SubpageHeader
+          backHref="/dashboard/instructor"
+          eyebrow="Student Performance Analytics"
+          eyebrowColor="text-teal-600 dark:text-teal-400"
+          title={course?.title || "Course Track"}
+          actions={
+            <Link
+              href={`/dashboard/instructor/courses/${course?.documentId || course?.id || id}/edit`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition shadow-sm w-fit"
+            >
+              <BookOpen className="w-4 h-4" /> Edit Curriculum
+            </Link>
+          }
+        />
+
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard title="Enrolled Learners" value={totalStudents} icon={Users} color="teal" subtitle="Active students in course" />
+          <StatCard title="Completed Course" value={completedStudents} icon={Award} color="emerald" subtitle={`${completedStudents} certificate eligible`} />
+          <StatCard title="In Progress" value={inProgressStudents} icon={Clock} color="indigo" subtitle="Currently learning curriculum" />
+          <StatCard title="Avg Completion" value={`${avgProgress}%`} icon={CheckCircle2} color="purple" subtitle="Platform cohort average" />
+        </div>
+
+        {/* Learner Table Card */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-teal-500" /> Enrolled Learners Progress
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Live progress tracking synchronized with lesson completion
+              </p>
+            </div>
+
+            <div className="relative min-w-[220px]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search learner name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-teal-500 transition"
+              />
+            </div>
+          </div>
+
+          {filteredEnrollments.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider">
+                  <tr>
+                    <th className="pb-3 pl-2">Learner</th>
+                    <th className="pb-3">Status</th>
+                    <th className="pb-3">Lectures Done</th>
+                    <th className="pb-3 min-w-[140px]">Progress Bar</th>
+                    <th className="pb-3 pr-2 text-right">Completion</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {filteredEnrollments.map((enrollment, idx) => {
+                    const student = enrollment.student || {};
+                    const progress = enrollment.progress || 0;
+                    const isCompleted = enrollment.isCompleted || progress >= 100;
+                    const completedCount = enrollment.completedLessons?.length || 0;
+
+                    return (
+                      <tr key={enrollment.documentId || enrollment.id || idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
+                        <td className="py-4 pl-2">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold text-xs">
+                              {student.username ? student.username.slice(0, 2).toUpperCase() : "ST"}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900 dark:text-white">{student.username || "Enrolled Student"}</p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400">{student.email || "No email linked"}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4">
+                          <StatusBadge status={isCompleted ? "Completed" : "In Progress"} size="sm" />
+                        </td>
+                        <td className="py-4 font-semibold text-slate-700 dark:text-slate-300">
+                          {completedCount} of {totalLessonsCount} lectures
+                        </td>
+                        <td className="py-4">
+                          <ProgressBar progress={progress} isCompleted={isCompleted} color="teal" />
+                        </td>
+                        <td className="py-4 pr-2 text-right font-black text-slate-900 dark:text-white">
+                          {progress}%
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <EmptyState
+              icon={Users}
+              title="No Enrolled Learners Found"
+              description="Students who enroll and make progress in this track will automatically show up in this live analytics table."
+            />
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+}

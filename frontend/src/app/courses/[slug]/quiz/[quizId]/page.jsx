@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { fetchAPI } from "@/lib/api";
+import PageLoader from "@/components/common/PageLoader";
 import { Clock, CheckCircle2, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 
-const LiveQuizPage = () => {
+export default function LiveQuizPage() {
     const { slug, quizId } = useParams();
     const router = useRouter();
     const { user, token } = useAuth();
@@ -112,11 +113,7 @@ const LiveQuizPage = () => {
     };
 
     if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
-            </div>
-        );
+        return <PageLoader color="text-indigo-600 dark:text-indigo-400" message="Loading assessment questions..." minHeight="min-h-screen" />;
     }
 
     if (!quiz || questions.length === 0) {
@@ -174,10 +171,11 @@ const LiveQuizPage = () => {
                                 <button
                                     key={optIdx}
                                     onClick={() => handleSelectOption(currentIndex, optIdx)}
-                                    className={`w-full p-4 rounded-2xl border text-left text-xs sm:text-sm font-semibold transition flex items-center justify-between ${isSelected
+                                    className={`w-full p-4 rounded-2xl border text-left text-xs sm:text-sm font-semibold transition flex items-center justify-between ${
+                                        isSelected
                                             ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300"
                                             : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200"
-                                        }`}
+                                    }`}
                                 >
                                     <span>{opt}</span>
                                     {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
@@ -198,7 +196,7 @@ const LiveQuizPage = () => {
 
                         {currentIndex < questions.length - 1 ? (
                             <button
-                                onClick={() => setCurrentIndex((prev) => prev + 1)}
+                                onClick={() => setCurrentIndex((prev) => prev - 1)}
                                 className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition flex items-center gap-1.5"
                             >
                                 Next Question <ArrowRight className="w-3.5 h-3.5" />
@@ -207,7 +205,7 @@ const LiveQuizPage = () => {
                             <button
                                 disabled={submitting}
                                 onClick={handleSubmitQuiz}
-                                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs transition flex items-center gap-2"
+                                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs transition flex items-center gap-2 shadow-sm"
                             >
                                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                                 <span>{submitting ? "Grading & Saving..." : "Submit Assessment"}</span>
@@ -219,6 +217,4 @@ const LiveQuizPage = () => {
             </div>
         </div>
     );
-};
-
-export default LiveQuizPage;
+}

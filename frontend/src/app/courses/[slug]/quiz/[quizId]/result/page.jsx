@@ -5,9 +5,10 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { fetchAPI } from "@/lib/api";
-import { Award, CheckCircle2, XCircle, RotateCcw, ArrowLeft, Loader2, Calendar } from "lucide-react";
+import PageLoader from "@/components/common/PageLoader";
+import { Award, CheckCircle2, XCircle, RotateCcw, ArrowLeft, Calendar } from "lucide-react";
 
-const QuizResultPage = () => {
+export default function QuizResultPage() {
     const { slug, quizId } = useParams();
     const { user, token } = useAuth();
     const [result, setResult] = useState(null);
@@ -35,7 +36,7 @@ const QuizResultPage = () => {
                         { token }
                     );
                     const submissions = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-
+                    
                     const match = submissions.find(
                         (s) =>
                             String(s.quiz?.documentId) === String(quizId) ||
@@ -65,11 +66,7 @@ const QuizResultPage = () => {
     }, [quizId, user?.id, token]);
 
     if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
-            </div>
-        );
+        return <PageLoader color="text-indigo-600 dark:text-indigo-400" message="Loading your assessment score..." minHeight="min-h-screen" />;
     }
 
     if (!result) {
@@ -97,20 +94,22 @@ const QuizResultPage = () => {
                 {/* Result Score Card */}
                 <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center space-y-4">
                     <div
-                        className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center ${isPassed
+                        className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center ${
+                            isPassed
                                 ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
                                 : "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400"
-                            }`}
+                        }`}
                     >
                         <Award className="w-8 h-8" />
                     </div>
 
                     <div>
                         <span
-                            className={`text-xs font-bold uppercase px-3 py-1 rounded-full border ${isPassed
+                            className={`text-xs font-bold uppercase px-3 py-1 rounded-full border ${
+                                isPassed
                                     ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                                     : "bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border-red-200 dark:border-red-800"
-                                }`}
+                            }`}
                         >
                             {isPassed ? "Passed Successfully" : "Needs Improvement"}
                         </span>
@@ -197,6 +196,4 @@ const QuizResultPage = () => {
             </div>
         </div>
     );
-};
-
-export default QuizResultPage;
+}
