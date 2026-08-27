@@ -79,7 +79,7 @@ return (
                     </div>
                   </div>
 
-                  {lesson.isTrial || lesson.isFreePreview ? (
+                  {lesson.isPreview || lesson.isTrial || lesson.isFreePreview ? (
                     <button
                       onClick={() => setPreviewVideo(lesson)}
                       className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 dark:text-indigo-400 hover:bg-indigo-100 transition"
