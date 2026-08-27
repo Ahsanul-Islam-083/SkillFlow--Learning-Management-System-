@@ -1,143 +1,178 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { fetchAPI } from "@/lib/api";
 import DashboardBanner from "@/components/dashboard/DashboardBanner";
-import StatCard from "@/components/dashboard/StatCard";
 import PageLoader from "@/components/common/PageLoader";
-import {
-  ShieldCheck,
-  Users,
-  BookOpen,
-  Newspaper,
-  Layers,
-  ArrowRight,
-  Sparkles
-} from "lucide-react";
+import AlertBanner from "@/components/common/AlertBanner";
+import AdminStatsOverview from "@/components/dashboard/admin/AdminStatsOverview";
+import AdminUserTable from "@/components/dashboard/admin/AdminUserTable";
+import AdminCourseTable from "@/components/dashboard/admin/AdminCourseTable";
+import AdminBlogTable from "@/components/dashboard/admin/AdminBlogTable";
+import { Users, BookOpen, Newspaper, PlusCircle } from "lucide-react";
 
-export default function AdminDashboard() {
-  const { user, token } = useAuth();
+const AdminDashboard = () => {
+
+  const { user: currentAdmin, token } = useAuth();
+
+  const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [courses, setCourses] = useState([]);
   const [blogs, setBlogs] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadAdminData() {
-      try {
-        const [coursesRes, blogsRes] = await Promise.allSettled([
-          fetchAPI("/courses?populate=*", { token }),
-          fetchAPI("/blogs?populate=*", { token }),
-        ]);
+  // Active View Tab: "users" | "courses" | "blogs"
+  const [activeTab, setActiveTab] = useState("users");
+  const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
 
-        if (coursesRes.status === "fulfilled") {
-          const list = Array.isArray(coursesRes.value?.data) ? coursesRes.value.data : Array.isArray(coursesRes.value) ? coursesRes.value : [];
-          setCourses(list);
-        }
 
-        if (blogsRes.status === "fulfilled") {
-          const list = Array.isArray(blogsRes.value?.data) ? blogsRes.value.data : Array.isArray(blogsRes.value) ? blogsRes.value : [];
-          setBlogs(list);
-        }
-      } catch (err) {
-        console.error("Failed to load admin stats:", err);
-      } finally {
-        setLoading(false);
+  const loadAdminPlatformData = useCallback(async () => {
+    try {
+      const [usersRes, rolesRes, coursesRes, blogsRes, enrollmentsRes] = await Promise.allSettled([
+        fetchAPI("/users?populate=role", { token }),
+        fetchAPI("/users-permissions/roles", { token }),
+        fetchAPI("/courses?populate=*", { token }),
+        fetchAPI("/blogs?populate=*", { token }),
+        fetchAPI("/enrollments?populate=*", { token }),
+      ]);
+
+
+      if (usersRes.status === "fulfilled") {
+        setUsers(Array.isArray(usersRes.value) ? usersRes.value : usersRes.value?.data || []);
       }
+      if (rolesRes.status === "fulfilled") {
+        setRoles(rolesRes.value?.roles || rolesRes.value || []);
+      }
+      if (coursesRes.status === "fulfilled") {
+        setCourses(coursesRes.value?.data || coursesRes.value || []);
+      }
+      if (blogsRes.status === "fulfilled") {
+        setBlogs(blogsRes.value?.data || blogsRes.value || []);
+      }
+      if (enrollmentsRes.status === "fulfilled") {
+        setEnrollments(enrollmentsRes.value?.data || enrollmentsRes.value || []);
+      }
+    } catch (err) {
+      console.error("Failed to load admin data:", err);
+    } finally {
+      setLoading(false);
     }
-
-    loadAdminData();
   }, [token]);
 
+  useEffect(() => {
+    loadAdminPlatformData();
+  }, [loadAdminPlatformData]);
   if (loading) {
-    return <PageLoader color="text-amber-600 dark:text-amber-400" message="Loading administrative command center..." />;
+    return (
+      <PageLoader
+        color="text-amber-600 dark:text-amber-400"
+        message="Loading administrative command center..."
+      />
+    );
   }
+  // Calculate Metrics
+  const totalUsers = users.length;
+  const adminsCount = users.filter((u) => (u.role?.name || u.role?.type || "").toLowerCase().includes("admin")).length;
+  const managersCount = users.filter((u) => (u.role?.name || u.role?.type || "").toLowerCase().includes("manager")).length;
+  const instructorsCount = users.filter((u) => (u.role?.name || u.role?.type || "").toLowerCase().includes("instructor")).length;
+  const studentsCount = totalUsers - adminsCount - managersCount - instructorsCount;
+
 
   return (
     <div className="space-y-8">
-      {/* Dashboard Banner */}
+      {/* 1. Admin Hero Banner */}
       <DashboardBanner
-        eyebrow="System Administration & Governance"
-        title={`Welcome back, ${user?.username || "Admin"}! 🛡️`}
-        subtitle="Platform-wide operational oversight, role permissions, and content management."
-        actionText="Manage Courses"
-        actionHref="/dashboard/manager/courses"
-        actionIcon={Layers}
+        eyebrow="System Administration & Enterprise RBAC"
+        title={`Welcome back, ${currentAdmin?.username || "Admin"}! 🛡️`}
+        subtitle="Platform-wide operational control: Manage user roles, govern course curricula, and publish articles."
+        actionText="Create Course Track"
+        actionHref="/dashboard/manager/courses/new"
+        actionIcon={PlusCircle}
         gradient="from-amber-950 via-slate-900 to-slate-900 border border-amber-900/40"
       />
-
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard
-          title="Platform Courses"
-          value={courses.length}
-          icon={BookOpen}
-          color="indigo"
-          subtitle="Curriculum tracks deployed"
-          href="/dashboard/manager/courses"
-        />
-        <StatCard
-          title="Published Articles"
-          value={blogs.length}
-          icon={Newspaper}
-          color="purple"
-          subtitle="Community articles"
-          href="/dashboard/manager/blogs"
-        />
-        <StatCard
-          title="System Governance"
-          value="Online"
-          icon={ShieldCheck}
-          color="emerald"
-          subtitle="Role policies active"
-        />
+      {/* 2. Platform Real Statistics & Breakdown */}
+      <AdminStatsOverview
+        totalUsers={totalUsers}
+        totalEnrollments={enrollments.length}
+        totalCourses={courses.length}
+        totalBlogs={blogs.length}
+        studentsCount={studentsCount}
+        instructorsCount={instructorsCount}
+        managersCount={managersCount}
+        adminsCount={adminsCount}
+      />
+      <AlertBanner type={statusMessage.type} message={statusMessage.text} />
+      {/* 3. Navigation Tabs */}
+      <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl w-fit">
+        <button
+          onClick={() => setActiveTab("users")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${activeTab === "users"
+              ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }`}
+        >
+          <Users className="w-4 h-4" /> Users & Roles ({users.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("courses")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${activeTab === "courses"
+              ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }`}
+        >
+          <BookOpen className="w-4 h-4" /> Courses & Lessons ({courses.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("blogs")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${activeTab === "blogs"
+              ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }`}
+        >
+          <Newspaper className="w-4 h-4" /> Blog Posts ({blogs.length})
+        </button>
       </div>
-
-      {/* Quick Governance Links */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
-          <div className="space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-              <Layers className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              Course Catalog Management
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Review all published courses and drafts, inspect instructor lectures, and verify curriculum quality.
-            </p>
-          </div>
-          <Link
-            href="/dashboard/manager/courses"
-            className="inline-flex items-center justify-between p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-bold text-xs hover:bg-indigo-100 transition group"
-          >
-            <span>Open Course Control</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-          </Link>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
-          <div className="space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-              <Newspaper className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              Editorial Blog Studio
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Manage platform-wide publications, review manager drafts, and publish educational tech articles.
-            </p>
-          </div>
-          <Link
-            href="/dashboard/manager/blogs"
-            className="inline-flex items-center justify-between p-3 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-bold text-xs hover:bg-purple-100 transition group"
-          >
-            <span>Open Editorial Studio</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-          </Link>
-        </div>
-      </div>
+      {/* 4. Tab Views */}
+      {activeTab === "users" && (
+        <AdminUserTable
+          users={users}
+          roles={roles}
+          currentAdmin={currentAdmin}
+          token={token}
+          onUserUpdated={(userId, patch) => {
+            setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, ...patch } : u)));
+            setStatusMessage({ type: "success", text: "User updated successfully." });
+          }}
+          onUserDeleted={(userId) => {
+            setUsers((prev) => prev.filter((u) => u.id !== userId));
+            setStatusMessage({ type: "success", text: "User account deleted." });
+          }}
+        />
+      )}
+      {activeTab === "courses" && (
+        <AdminCourseTable
+          courses={courses}
+          token={token}
+          onCourseDeleted={(courseId) => {
+            setCourses((prev) => prev.filter((c) => (c.documentId || c.id) !== courseId));
+            setStatusMessage({ type: "success", text: "Course track deleted." });
+          }}
+        />
+      )}
+      {activeTab === "blogs" && (
+        <AdminBlogTable
+          blogs={blogs}
+          token={token}
+          onBlogDeleted={(blogId) => {
+            setBlogs((prev) => prev.filter((b) => (b.documentId || b.id) !== blogId));
+            setStatusMessage({ type: "success", text: "Blog article deleted." });
+          }}
+        />
+      )}
     </div>
   );
 }
+
+
+export default AdminDashboard;
