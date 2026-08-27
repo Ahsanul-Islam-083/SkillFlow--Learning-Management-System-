@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchAPI } from "@/lib/api";
-import { Clock, ArrowLeft, Calendar, User } from "lucide-react";
+import MarkdownRenderer from "@/components/common/MarkdownRenderer";
+import { Clock, ArrowLeft, Calendar, User, Tag } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -18,7 +19,7 @@ async function getBlog(slug) {
 }
 
 const SingleBlogPage = async ({ params }) => {
-const { slug } = await params;
+  const { slug } = await params;
   const blog = await getBlog(slug);
 
   if (!blog) {
@@ -26,6 +27,7 @@ const { slug } = await params;
   }
 
   const cover =
+    blog.coverImageUrl ||
     blog.coverImage?.url ||
     "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop";
 
@@ -39,11 +41,19 @@ const { slug } = await params;
           <ArrowLeft className="w-4 h-4" /> Back to Articles
         </Link>
 
+        {blog.category && (
+          <div className="mb-3">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 uppercase tracking-wider">
+              <Tag className="w-3 h-3" /> {blog.category}
+            </span>
+          </div>
+        )}
+
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15]">
           {blog.title}
         </h1>
 
-      
+        {/* Metadata Bar */}
         <div className="flex flex-wrap items-center gap-4 mt-6 pb-6 border-b border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-1.5">
             <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
@@ -61,17 +71,19 @@ const { slug } = await params;
           )}
         </div>
 
-      
+        {/* Cover Photo */}
         <div className="relative aspect-video my-8 rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-md">
           <Image src={cover} alt={blog.title} fill className="object-cover" priority />
         </div>
 
-       
-        <div className="prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 leading-relaxed text-base space-y-4">
+        {/* Formatted Markdown Body */}
+        <div className="text-slate-800 dark:text-slate-200 leading-relaxed text-base">
           {blog.content ? (
-            <div className="whitespace-pre-line">{blog.content}</div>
+            <MarkdownRenderer content={blog.content} />
           ) : (
-            <p>{blog.excerpt || "No content available for this publication."}</p>
+            <p className="text-slate-500 dark:text-slate-400 italic">
+              {blog.excerpt || "No content available for this publication."}
+            </p>
           )}
         </div>
       </div>
@@ -79,4 +91,4 @@ const { slug } = await params;
   );
 };
 
-export default SingleBlogPage;
+export default SingleBlogPage;

@@ -24,7 +24,7 @@ const NewCoursePage = () => {
         title: "",
         slug: "",
         category: "Web Development",
-        level: "beginner",
+        level: "Beginner",
         description: "",
         thumbnailUrl: "",
     });
@@ -182,9 +182,9 @@ const NewCoursePage = () => {
                                     onChange={(e) => setFormData({ ...formData, level: e.target.value })}
                                     className="mt-1.5 w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-teal-500 transition"
                                 >
-                                    <option value="beginner">Beginner</option>
-                                    <option value="intermediate">Intermediate</option>
-                                    <option value="advanced">Advanced</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
                                 </select>
                             </div>
 

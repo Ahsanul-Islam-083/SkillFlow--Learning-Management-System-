@@ -81,7 +81,9 @@ const QuizResultPage = () => {
 
                     {result.questions?.map((q, idx) => {
                         const userAns = result.selectedAnswers[idx];
-                        const isCorrect = userAns === q.correctAnswer;
+                        const correctIndex = q.correctAnswerIndex ?? q.correctAnswer ?? 0;
+                        const isCorrect = userAns === correctIndex;
+                        const questionTitle = q.questionText || q.question || "Assessment Question";
 
                         return (
                             <div
@@ -90,7 +92,7 @@ const QuizResultPage = () => {
                             >
                                 <div className="flex items-start justify-between gap-4">
                                     <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-                                        {idx + 1}. {q.question}
+                                        {idx + 1}. {questionTitle}
                                     </h3>
                                     {isCorrect ? (
                                         <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
@@ -107,14 +109,14 @@ const QuizResultPage = () => {
                                     <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60">
                                         <span className="text-slate-400 block mb-0.5">Your Choice:</span>
                                         <span className={`font-semibold ${isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}`}>
-                                            {userAns !== undefined ? q.options[userAns] : "Not Answered"}
+                                            {userAns !== undefined && q.options ? q.options[userAns] : "Not Answered"}
                                         </span>
                                     </div>
 
                                     <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60">
                                         <span className="text-slate-400 block mb-0.5">Correct Answer:</span>
                                         <span className="font-semibold text-emerald-700 dark:text-emerald-300">
-                                            {q.options[q.correctAnswer]}
+                                            {q.options && q.options[correctIndex] ? q.options[correctIndex] : "Option A"}
                                         </span>
                                     </div>
                                 </div>

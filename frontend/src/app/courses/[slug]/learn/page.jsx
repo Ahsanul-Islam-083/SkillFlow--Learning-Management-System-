@@ -18,27 +18,57 @@ import {
 } from "lucide-react";
 
 const CourseLearningPlayer = () => {
-
     const { slug } = useParams();
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, token } = useAuth();
 
     const [course, setCourse] = useState(null);
     const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
     const [completedLessons, setCompletedLessons] = useState(new Set());
+    const [enrollmentDocId, setEnrollmentDocId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    // local storage key for saving progress
+    // Local storage key for offline caching
     const storageKey = `sf_progress_${user?.id || user?.email || "guest"}_${slug}`;
 
+    // 1. Load course details and synchronize enrollment progress
     useEffect(() => {
         async function loadCourseData() {
             try {
                 const res = await fetchAPI(`/courses?filters[slug][$eq]=${slug}&populate=*`);
                 const courses = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
                 if (courses.length > 0) {
-                    setCourse(courses[0]);
+                    const foundCourse = courses[0];
+                    setCourse(foundCourse);
+
+                    // Fetch existing enrollment from Strapi if authenticated
+                    if (user?.id && token) {
+                        try {
+                            const courseDocId = foundCourse.documentId || foundCourse.id;
+                            const enrollRes = await fetchAPI(
+                                `/enrollments?filters[student][id][$eq]=${user.id}&filters[course][documentId][$eq]=${courseDocId}&populate[0]=completedLessons`,
+                                { token }
+                            );
+                            const enrollments = Array.isArray(enrollRes?.data) ? enrollRes.data : Array.isArray(enrollRes) ? enrollRes : [];
+                            
+                            if (enrollments.length > 0) {
+                                const currentEnrollment = enrollments[0];
+                                setEnrollmentDocId(currentEnrollment.documentId);
+                                
+                                const remoteCompleted = new Set(
+                                    (currentEnrollment.completedLessons || []).map((l) => l.id || l.documentId)
+                                );
+
+                                if (remoteCompleted.size > 0) {
+                                    setCompletedLessons(remoteCompleted);
+                                    localStorage.setItem(storageKey, JSON.stringify(Array.from(remoteCompleted)));
+                                }
+                            }
+                        } catch (enrollErr) {
+                            console.warn("Could not fetch remote enrollment progress:", enrollErr);
+                        }
+                    }
                 }
             } catch (err) {
                 console.error("Failed to load course details:", err);
@@ -47,23 +77,23 @@ const CourseLearningPlayer = () => {
             }
         }
         if (slug) loadCourseData();
-    }, [slug]);
+    }, [slug, user, token, storageKey]);
 
-    // after refresh, restore completed lessons from local storage
+    // 2. Restore cached progress from localStorage if not already loaded
     useEffect(() => {
         if (!slug) return;
         try {
             const saved = localStorage.getItem(storageKey);
-            if (saved) {
+            if (saved && completedLessons.size === 0) {
                 const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed)) {
+                if (Array.isArray(parsed) && parsed.length > 0) {
                     setCompletedLessons(new Set(parsed));
                 }
             }
         } catch (e) {
-            console.error("Failed to restore progress:", e);
+            console.error("Failed to restore progress from cache:", e);
         }
-    }, [slug, storageKey]);
+    }, [slug, storageKey, completedLessons.size]);
 
     if (loading) {
         return (
@@ -88,28 +118,65 @@ const CourseLearningPlayer = () => {
     const quizzes = course.quizzes || [];
     const currentLesson = lessons[currentLessonIndex] || null;
 
-    // toggle lesson completion and store progress in local storage
-    const toggleCompleteAndNext = (lessonId) => {
-        setCompletedLessons((prev) => {
-            const updated = new Set(prev);
-            if (updated.has(lessonId)) {
-                updated.delete(lessonId);
-            } else {
-                updated.add(lessonId);
-            }
+    // 3. Toggle lesson completion and persist to Strapi & localStorage
+    const toggleCompleteAndNext = async (lessonIdentifier) => {
+        const updated = new Set(completedLessons);
+        if (updated.has(lessonIdentifier)) {
+            updated.delete(lessonIdentifier);
+        } else {
+            updated.add(lessonIdentifier);
+        }
 
-            // Save updated progress to local storage
-            try {
-                localStorage.setItem(storageKey, JSON.stringify(Array.from(updated)));
-            } catch (e) {
-                console.error("Failed to save progress:", e);
-            }
+        setCompletedLessons(updated);
 
-            return updated;
-        });
+        // Update local storage cache immediately
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(Array.from(updated)));
+        } catch (e) {
+            console.error("Failed to save progress locally:", e);
+        }
 
+        // Advance to next lecture if available
         if (currentLessonIndex < lessons.length - 1) {
             setCurrentLessonIndex((prev) => prev + 1);
+        }
+
+        // Asynchronously persist enrollment progress to Strapi
+        if (user?.id && token && course) {
+            const progressPct = lessons.length > 0 ? Math.round((updated.size / lessons.length) * 100) : 0;
+            const completedLessonRelations = Array.from(updated).filter((id) => id && !String(id).startsWith("temp-"));
+            const courseDocId = course.documentId || course.id;
+
+            const enrollmentPayload = {
+                data: {
+                    student: user.id,
+                    course: courseDocId,
+                    completedLessons: completedLessonRelations,
+                    progress: progressPct,
+                    isCompleted: progressPct >= 100,
+                },
+            };
+
+            try {
+                if (enrollmentDocId) {
+                    await fetchAPI(`/enrollments/${enrollmentDocId}`, {
+                        method: "PUT",
+                        token: token,
+                        body: enrollmentPayload,
+                    });
+                } else {
+                    const newEnroll = await fetchAPI("/enrollments", {
+                        method: "POST",
+                        token: token,
+                        body: enrollmentPayload,
+                    });
+                    if (newEnroll?.data?.documentId) {
+                        setEnrollmentDocId(newEnroll.data.documentId);
+                    }
+                }
+            } catch (syncErr) {
+                console.warn("Enrollment progress sync failed (cached locally):", syncErr);
+            }
         }
     };
 

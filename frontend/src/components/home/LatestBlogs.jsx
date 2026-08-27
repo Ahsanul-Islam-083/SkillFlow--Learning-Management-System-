@@ -27,6 +27,7 @@ return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {blogs.slice(0, 3).map((blog) => {
           const cover =
+            blog.coverImageUrl ||
             blog.coverImage?.url ||
             "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop";
 

@@ -66,7 +66,8 @@ const LiveQuizPage = () => {
         // score calculation based on selected answers
         let score = 0;
         questions.forEach((q, idx) => {
-            if (selectedAnswers[idx] === q.correctAnswer) {
+            const correctIndex = q.correctAnswerIndex ?? q.correctAnswer ?? 0;
+            if (selectedAnswers[idx] === correctIndex) {
                 score += 1;
             }
         });
@@ -96,6 +97,7 @@ const LiveQuizPage = () => {
     const currentQ = questions[currentIndex];
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
+    const questionText = currentQ?.questionText || currentQ?.question || "Assessment Question";
 
     return (
         <div className="min-h-screen py-12 bg-slate-50 dark:bg-slate-950">
@@ -126,7 +128,7 @@ const LiveQuizPage = () => {
                     </div>
 
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white leading-snug">
-                        {currentQ.question}
+                        {questionText}
                     </h2>
 
                     <div className="space-y-3">

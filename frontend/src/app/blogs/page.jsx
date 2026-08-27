@@ -37,6 +37,7 @@ const BlogsPage = async () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {blogs.map((blog) => {
                             const cover =
+                                blog.coverImageUrl ||
                                 blog.coverImage?.url ||
                                 "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop";
 
@@ -53,6 +54,11 @@ const BlogsPage = async () => {
                                             fill
                                             className="object-cover group-hover:scale-105 transition duration-300"
                                         />
+                                        {blog.category && (
+                                            <span className="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-md bg-slate-900/80 backdrop-blur text-white uppercase tracking-wider">
+                                                {blog.category}
+                                            </span>
+                                        )}
                                     </div>
 
                                     <div className="p-5 flex-1 flex flex-col justify-between">
