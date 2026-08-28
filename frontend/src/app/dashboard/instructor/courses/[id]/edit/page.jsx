@@ -290,7 +290,7 @@ const EditCoursePage = () => {
           <button
             onClick={handleSaveChanges}
             disabled={saving}
-            className="px-6 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 disabled:opacity-50 text-slate-950 font-bold text-xs transition flex items-center gap-2 shadow-sm w-fit"
+            className="w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 disabled:opacity-50 text-slate-950 font-bold text-xs transition flex items-center gap-2 shadow-sm"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             <span>{saving ? "Saving Changes..." : "Save All Changes"}</span>

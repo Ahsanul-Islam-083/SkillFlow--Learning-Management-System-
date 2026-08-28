@@ -263,7 +263,7 @@ export default function BlogManagementStudio() {
 
           <button
             onClick={handleOpenCreateModal}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition shadow-sm w-fit"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition shadow-sm"
           >
             <PlusCircle className="w-4 h-4" /> Write New Article
           </button>
@@ -327,15 +327,15 @@ export default function BlogManagementStudio() {
 
           {filteredBlogs.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider">
+              <table className="w-full min-w-[760px] text-left text-xs">
+                <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider text-[11px]">
                   <tr>
-                    <th className="pb-3 pl-2">Article & Excerpt</th>
-                    <th className="pb-3">Category</th>
-                    <th className="pb-3">Read Time</th>
-                    <th className="pb-3">Author</th>
-                    <th className="pb-3">Status</th>
-                    <th className="pb-3 pr-2 text-right">Actions</th>
+                    <th className="pb-3 pl-3 pr-4 min-w-[240px] whitespace-nowrap">Article & Excerpt</th>
+                    <th className="pb-3 px-4 min-w-[130px] whitespace-nowrap">Category</th>
+                    <th className="pb-3 px-4 min-w-[110px] whitespace-nowrap">Read Time</th>
+                    <th className="pb-3 px-4 min-w-[120px] whitespace-nowrap">Author</th>
+                    <th className="pb-3 px-4 min-w-[110px] whitespace-nowrap">Status</th>
+                    <th className="pb-3 pl-4 pr-3 text-right min-w-[120px] whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -351,12 +351,12 @@ export default function BlogManagementStudio() {
                         key={blog.documentId || blog.id}
                         className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition group"
                       >
-                        <td className="py-4 pl-2">
+                        <td className="py-4 pl-3 pr-4">
                           <div className="flex items-center gap-3">
                             <div className="relative w-16 h-11 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
                               <Image src={cover} alt={blog.title} fill className="object-cover" />
                             </div>
-                            <div className="min-w-0 max-w-sm">
+                            <div className="min-w-0 max-w-xs">
                               <p className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-purple-600 dark:group-hover:text-purple-400 transition truncate">
                                 {blog.title}
                               </p>
@@ -367,23 +367,23 @@ export default function BlogManagementStudio() {
                           </div>
                         </td>
 
-                        <td className="py-4 font-semibold text-slate-700 dark:text-slate-300">
+                        <td className="py-4 px-4 whitespace-nowrap font-semibold text-slate-700 dark:text-slate-300">
                           {blog.category || "Tutorials"}
                         </td>
 
-                        <td className="py-4 text-slate-500 dark:text-slate-400 font-medium">
+                        <td className="py-4 px-4 whitespace-nowrap text-slate-500 dark:text-slate-400 font-medium">
                           {blog.readTime || "5 min read"}
                         </td>
 
-                        <td className="py-4 text-slate-600 dark:text-slate-400">
+                        <td className="py-4 px-4 whitespace-nowrap text-slate-600 dark:text-slate-400">
                           {blog.author?.username || user?.username || "Editorial Team"}
                         </td>
 
-                        <td className="py-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <StatusBadge status={isPub ? "Published" : "Draft"} />
                         </td>
 
-                        <td className="py-4 pr-2 text-right">
+                        <td className="py-4 pl-4 pr-3 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1.5">
                             {/* View Public Article */}
                             <Link

@@ -131,14 +131,14 @@ export default function ManagerCoursesPage() {
 
           {filteredCourses.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider">
+              <table className="w-full min-w-[780px] text-left text-xs">
+                <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider text-[11px]">
                   <tr>
-                    <th className="pb-3 pl-2">Course Track</th>
-                    <th className="pb-3">Category & Level</th>
-                    <th className="pb-3">Curriculum</th>
-                    <th className="pb-3">Status</th>
-                    <th className="pb-3 pr-2 text-right">Actions</th>
+                    <th className="pb-3 pl-3 pr-4 min-w-[260px] whitespace-nowrap">Course Track</th>
+                    <th className="pb-3 px-4 min-w-[140px] whitespace-nowrap">Category & Level</th>
+                    <th className="pb-3 px-4 min-w-[130px] whitespace-nowrap">Curriculum</th>
+                    <th className="pb-3 px-4 min-w-[110px] whitespace-nowrap">Status</th>
+                    <th className="pb-3 pl-4 pr-3 text-right min-w-[140px] whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -152,12 +152,12 @@ export default function ManagerCoursesPage() {
 
                     return (
                       <tr key={cId} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition group">
-                        <td className="py-4 pl-2">
+                        <td className="py-4 pl-3 pr-4">
                           <div className="flex items-center gap-3">
                             <div className="relative w-14 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
                               <Image src={thumbnail} alt={c.title} fill className="object-cover" />
                             </div>
-                            <div className="min-w-0 max-w-sm">
+                            <div className="min-w-0 max-w-xs">
                               <p className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-purple-600 transition truncate">
                                 {c.title}
                               </p>
@@ -168,7 +168,7 @@ export default function ManagerCoursesPage() {
                           </div>
                         </td>
 
-                        <td className="py-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <span className="font-bold text-slate-700 dark:text-slate-300 block">
                             {c.category || "Web Development"}
                           </span>
@@ -177,7 +177,7 @@ export default function ManagerCoursesPage() {
                           </span>
                         </td>
 
-                        <td className="py-4 text-slate-600 dark:text-slate-400">
+                        <td className="py-4 px-4 whitespace-nowrap text-slate-600 dark:text-slate-400">
                           <span className="font-semibold text-slate-900 dark:text-white">
                             {c.lessons?.length || 0} Lessons
                           </span>
@@ -186,11 +186,11 @@ export default function ManagerCoursesPage() {
                           </span>
                         </td>
 
-                        <td className="py-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <StatusBadge status={isPub ? "Published" : "Draft"} />
                         </td>
 
-                        <td className="py-4 pr-2 text-right">
+                        <td className="py-4 pl-4 pr-3 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1.5">
                             <Link
                               href={`/courses/${c.slug}`}

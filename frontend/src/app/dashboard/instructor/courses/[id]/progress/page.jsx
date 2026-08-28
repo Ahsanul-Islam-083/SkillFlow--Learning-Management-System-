@@ -129,7 +129,7 @@ export default function CourseProgressPage() {
         />
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard title="Enrolled Learners" value={totalStudents} icon={Users} color="teal" subtitle="Active students in course" />
           <StatCard title="Completed Course" value={completedStudents} icon={Award} color="emerald" subtitle={`${completedStudents} certificate eligible`} />
           <StatCard title="In Progress" value={inProgressStudents} icon={Clock} color="indigo" subtitle="Currently learning curriculum" />
@@ -162,14 +162,14 @@ export default function CourseProgressPage() {
 
           {filteredEnrollments.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider">
+              <table className="w-full min-w-[700px] text-left text-xs">
+                <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider text-[11px]">
                   <tr>
-                    <th className="pb-3 pl-2">Learner</th>
-                    <th className="pb-3">Status</th>
-                    <th className="pb-3">Lectures Done</th>
-                    <th className="pb-3 min-w-[140px]">Progress Bar</th>
-                    <th className="pb-3 pr-2 text-right">Completion</th>
+                    <th className="pb-3 pl-3 pr-4 min-w-[200px] whitespace-nowrap">Learner</th>
+                    <th className="pb-3 px-4 min-w-[120px] whitespace-nowrap">Status</th>
+                    <th className="pb-3 px-4 min-w-[130px] whitespace-nowrap">Lectures Done</th>
+                    <th className="pb-3 px-4 min-w-[160px] whitespace-nowrap">Progress Bar</th>
+                    <th className="pb-3 pl-4 pr-3 text-right min-w-[110px] whitespace-nowrap">Completion</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -181,27 +181,27 @@ export default function CourseProgressPage() {
 
                     return (
                       <tr key={enrollment.documentId || enrollment.id || idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
-                        <td className="py-4 pl-2">
+                        <td className="py-4 pl-3 pr-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold text-xs">
+                            <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
                               {student.username ? student.username.slice(0, 2).toUpperCase() : "ST"}
                             </div>
-                            <div>
-                              <p className="font-bold text-slate-900 dark:text-white">{student.username || "Enrolled Student"}</p>
-                              <p className="text-[11px] text-slate-500 dark:text-slate-400">{student.email || "No email linked"}</p>
+                            <div className="min-w-0 max-w-xs">
+                              <p className="font-bold text-slate-900 dark:text-white truncate">{student.username || "Enrolled Student"}</p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{student.email || "No email linked"}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="py-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <StatusBadge status={isCompleted ? "Completed" : "In Progress"} size="sm" />
                         </td>
-                        <td className="py-4 font-semibold text-slate-700 dark:text-slate-300">
+                        <td className="py-4 px-4 whitespace-nowrap font-semibold text-slate-700 dark:text-slate-300">
                           {completedCount} of {totalLessonsCount} lectures
                         </td>
-                        <td className="py-4">
+                        <td className="py-4 px-4 min-w-[160px]">
                           <ProgressBar progress={progress} isCompleted={isCompleted} color="teal" />
                         </td>
-                        <td className="py-4 pr-2 text-right font-black text-slate-900 dark:text-white">
+                        <td className="py-4 pl-4 pr-3 text-right whitespace-nowrap font-black text-slate-900 dark:text-white">
                           {progress}%
                         </td>
                       </tr>

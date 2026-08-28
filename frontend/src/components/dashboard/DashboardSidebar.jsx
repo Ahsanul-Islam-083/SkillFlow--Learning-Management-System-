@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import RoleBadge from "@/components/common/RoleBadge";
@@ -220,9 +221,9 @@ export default function DashboardSidebar({
         }`}
       >
         {/* Top Header & Brand */}
-        <div>
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
           <div
-            className={`h-20 flex items-center border-b border-slate-100 dark:border-slate-800/80 px-4 ${
+            className={`h-20 flex items-center border-b border-slate-100 dark:border-slate-800/80 px-4 flex-shrink-0 ${
               isCollapsed ? "justify-center" : "justify-between"
             }`}
           >
@@ -232,18 +233,14 @@ export default function DashboardSidebar({
               className="flex items-center gap-3 group focus:outline-hidden"
               title="Return to Home Page"
             >
-              <div
-                className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-sm flex-shrink-0 transition-transform duration-300 group-hover:scale-105 ${
-                  roleColor === "teal"
-                    ? "bg-gradient-to-tr from-teal-600 to-teal-400"
-                    : roleColor === "purple"
-                    ? "bg-gradient-to-tr from-purple-600 to-purple-400"
-                    : roleColor === "amber"
-                    ? "bg-gradient-to-tr from-amber-600 to-amber-400"
-                    : "bg-gradient-to-tr from-indigo-600 to-indigo-400"
-                }`}
-              >
-                <GraduationCap className="w-5 h-5" />
+              <div className="relative w-10 h-10 rounded-2xl overflow-hidden shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+                <Image
+                  src="/logosf.png"
+                  alt="SkillFlow Logo"
+                  fill
+                  className="object-cover"
+                  priority
+                />
               </div>
 
               {!isCollapsed && (

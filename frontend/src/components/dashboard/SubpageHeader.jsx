@@ -35,7 +35,7 @@ export default function SubpageHeader({
         </div>
       </div>
 
-      {actions && <div className="flex items-center gap-3">{actions}</div>}
+      {actions && <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full sm:w-auto">{actions}</div>}
     </div>
   );
 }

@@ -103,7 +103,7 @@ const AdminUserTable = ({
     return (
         <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
             {/* Header with Search & Filter */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col lg:flex-col xl:flex-row xl:items-center justify-between gap-4">
                 <div>
                     <h2 className="font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2">
                         <Users className="w-5 h-5 text-amber-500" /> Platform User Directory & RBAC Roles
@@ -112,7 +112,7 @@ const AdminUserTable = ({
                         Assign roles, promote users, and regulate account access status.
                     </p>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <div className="relative w-full sm:w-64">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
@@ -139,14 +139,14 @@ const AdminUserTable = ({
             {/* Users Table */}
             {filteredUsers.length > 0 ? (
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                        <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider">
+                    <table className="w-full min-w-[800px] text-left text-xs">
+                        <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider text-[11px]">
                             <tr>
-                                <th className="pb-3 pl-2">User Profile</th>
-                                <th className="pb-3">Assigned Role</th>
-                                <th className="pb-3">Account Status</th>
-                                <th className="pb-3">Registered Date</th>
-                                <th className="pb-3 pr-2 text-right">Actions</th>
+                                <th className="pb-3 pl-3 pr-4 w-[35%] min-w-[240px] whitespace-nowrap">User Profile</th>
+                                <th className="pb-3 px-4 w-[18%] min-w-[140px] whitespace-nowrap">Assigned Role</th>
+                                <th className="pb-3 px-4 w-[15%] min-w-[120px] whitespace-nowrap">Account Status</th>
+                                <th className="pb-3 px-4 w-[18%] min-w-[140px] whitespace-nowrap">Registered Date</th>
+                                <th className="pb-3 pl-4 pr-3 text-right w-[14%] min-w-[120px] whitespace-nowrap">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -155,28 +155,28 @@ const AdminUserTable = ({
                                 const isSelf = u.id === currentAdmin?.id;
                                 return (
                                     <tr key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
-                                        <td className="py-4 pl-2">
+                                        <td className="py-4 pl-3 pr-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
                                                     {u.username ? u.username.slice(0, 2).toUpperCase() : "US"}
                                                 </div>
-                                                <div>
+                                                <div className="min-w-0 max-w-xs">
                                                     <div className="flex items-center gap-2">
-                                                        <p className="font-bold text-slate-900 dark:text-white text-sm">{u.username}</p>
+                                                        <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{u.username}</p>
                                                         {isSelf && (
-                                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60">
+                                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60 flex-shrink-0">
                                                                 You
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{u.email}</p>
+                                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{u.email}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="py-4">
+                                        <td className="py-4 px-4 whitespace-nowrap">
                                             <RoleBadge role={roleName} />
                                         </td>
-                                        <td className="py-4">
+                                        <td className="py-4 px-4 whitespace-nowrap">
                                             {u.blocked ? (
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200 dark:border-red-800">
                                                     <UserX className="w-3 h-3" /> Suspended
@@ -187,13 +187,13 @@ const AdminUserTable = ({
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="py-4 text-slate-500 font-medium">
+                                        <td className="py-4 px-4 whitespace-nowrap text-slate-500 font-medium">
                                             <div className="flex items-center gap-1.5 text-xs">
                                                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
                                                 <span>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "N/A"}</span>
                                             </div>
                                         </td>
-                                        <td className="py-4 pr-2 text-right">
+                                        <td className="py-4 pl-4 pr-3 text-right whitespace-nowrap">
                                             <div className="flex items-center justify-end gap-1.5">
                                                 <button
                                                     onClick={() => {

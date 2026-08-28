@@ -300,47 +300,60 @@ export default function CourseLearningPlayer() {
   const quizzes = course.quizzes || [];
   const currentLesson = lessons[currentLessonIndex] || null;
 
+  // Filter completed lessons strictly against valid current course lessons
+  const validLessonIds = new Set(
+    lessons.flatMap((l) => [String(l.id), String(l.documentId)].filter(Boolean))
+  );
+  const validCompletedCount = Array.from(completedLessons).filter((id) =>
+    validLessonIds.has(String(id))
+  ).length;
+
   const progressPercentage =
-    lessons.length > 0 ? Math.round((completedLessons.size / lessons.length) * 100) : 0;
+    lessons.length > 0
+      ? Math.min(100, Math.round((validCompletedCount / lessons.length) * 100))
+      : 0;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-white">
 
-    
+      {/* Top Learning Navigation Bar */}
       <div className="border-b border-slate-800 bg-purple-950/30 backdrop-blur sticky top-0 z-40">
-        <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/dashboard/student"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex-shrink-0"
               title="Back to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <div>
-              <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">
+            <div className="min-w-0">
+              <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider block">
                 Learning Track
               </span>
-              <h1 className="text-sm font-bold text-slate-100 truncate max-w-[200px] sm:max-w-md">
+              <h1 className="text-xs sm:text-sm font-bold text-slate-100 truncate max-w-[160px] sm:max-w-md">
                 {course.title}
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-3">
-              <div className="w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
+          <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+            {/* Progress Bar & Percentage */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-20 sm:w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
                 <div
                   className="h-full bg-indigo-500 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>
-              <span className="text-xs font-bold text-indigo-400">{progressPercentage}%</span>
+              <span className="text-xs font-bold text-indigo-400 whitespace-nowrap">{progressPercentage}%</span>
             </div>
 
+            {/* Mobile Syllabus Toggle Button */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 rounded-xl bg-slate-800 text-slate-300"
+              className="lg:hidden p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition"
+              aria-label="Toggle Syllabus"
             >
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -348,7 +361,6 @@ export default function CourseLearningPlayer() {
         </header>
       </div>
 
-     
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6">
 
         {/* Left: Video Player & Notes */}
@@ -435,6 +447,15 @@ export default function CourseLearningPlayer() {
           )}
         </main>
 
+        {/* Mobile Backdrop Overlay */}
+        {sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden"
+            aria-hidden="true"
+          />
+        )}
+
         {/* Right: Curriculum Sidebar */}
         <aside
           className={`fixed inset-y-0 right-0 w-80 bg-slate-900 border-l border-slate-800 z-50 p-5 overflow-y-auto transform transition-transform duration-300 lg:static lg:w-96 lg:translate-x-0 lg:rounded-3xl lg:border lg:border-slate-800 lg:p-6 lg:h-fit ${
@@ -445,7 +466,7 @@ export default function CourseLearningPlayer() {
             <div>
               <h3 className="font-bold text-sm text-white">Course Syllabus</h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                {completedLessons.size} of {lessons.length} lectures completed
+                {validCompletedCount} of {lessons.length} lectures completed
               </p>
             </div>
             <button

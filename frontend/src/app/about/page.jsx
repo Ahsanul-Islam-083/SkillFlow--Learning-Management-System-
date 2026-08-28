@@ -120,21 +120,21 @@ export default function AboutUsPage() {
             </span>
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
             SkillFlow is a next-generation learning management ecosystem built for modern developers, instructors, and editorial creators. Combining sequential video learning, instant quiz assessments, and enterprise role-based governance.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-4 max-w-md mx-auto sm:max-w-none">
             <Link
               href="/courses"
-              className="px-6 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md hover:shadow-indigo-500/20 transition flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md hover:shadow-indigo-500/20 transition flex items-center justify-center gap-2"
             >
               <BookOpen className="w-4 h-4" />
               <span>Explore Course Tracks</span>
             </Link>
             <Link
               href="/blogs"
-              className="px-6 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 font-bold text-sm transition flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80 font-bold text-sm transition flex items-center justify-center gap-2 shadow-2xs"
             >
               <span>Read Tech Articles</span>
               <ArrowRight className="w-4 h-4 text-slate-400" />

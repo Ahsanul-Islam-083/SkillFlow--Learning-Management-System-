@@ -15,7 +15,7 @@ const AdminStatsOverview = ({
     return (
         <div className="space-y-4">
             {/* 4 Main Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <StatCard
                     title="Total Platform Users"
                     value={totalUsers}
@@ -52,7 +52,7 @@ const AdminStatsOverview = ({
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-amber-500" /> Platform Role Distribution Breakdown
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3">
                     <div className="p-3 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40">
                         <p className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">Students</p>
                         <p className="text-xl font-extrabold text-slate-900 dark:text-white">{studentsCount}</p>

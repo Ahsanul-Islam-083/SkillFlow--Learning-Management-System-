@@ -26,16 +26,16 @@ const HeroSection = () => {
                 </p>
 
               
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-md mx-auto sm:max-w-none">
                     <Link 
                         href="/courses" 
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition shadow-lg shadow-indigo-600/20"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition shadow-lg shadow-indigo-600/20"
                     >
                         Explore Courses <ArrowRight className="w-4 h-4" />
                     </Link>
                     <Link
                         href="/register"
-                        className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium text-sm transition"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm transition shadow-2xs"
                     >
                         <PlayCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                         Join for Free

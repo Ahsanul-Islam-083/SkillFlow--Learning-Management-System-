@@ -45,7 +45,7 @@ const AdminCourseTable = ({ courses, token, onCourseDeleted }) => {
     );
     return (
         <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col lg:flex-col xl:flex-row xl:items-center justify-between gap-4">
                 <div>
                     <h2 className="font-extrabold text-lg text-slate-900 dark:text-white flex items-center gap-2">
                         <BookOpen className="w-5 h-5 text-amber-500" /> Platform Courses & Curricula ({courses.length})
@@ -54,7 +54,7 @@ const AdminCourseTable = ({ courses, token, onCourseDeleted }) => {
                         Full administrative control: inspect lectures, edit curriculum tracks, and check progress.
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <div className="relative w-full sm:w-64">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
@@ -67,7 +67,7 @@ const AdminCourseTable = ({ courses, token, onCourseDeleted }) => {
                     </div>
                     <Link
                         href="/dashboard/manager/courses/new"
-                        className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm"
+                        className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm"
                     >
                         <PlusCircle className="w-4 h-4" /> Create Track
                     </Link>
@@ -75,14 +75,14 @@ const AdminCourseTable = ({ courses, token, onCourseDeleted }) => {
             </div>
             {filteredCourses.length > 0 ? (
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                        <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider">
+                    <table className="w-full min-w-[800px] text-left text-xs">
+                        <thead className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold tracking-wider text-[11px]">
                             <tr>
-                                <th className="pb-3 pl-2">Course Track</th>
-                                <th className="pb-3">Category & Level</th>
-                                <th className="pb-3">Curriculum Content</th>
-                                <th className="pb-3">Status</th>
-                                <th className="pb-3 pr-2 text-right">Admin Actions</th>
+                                <th className="pb-3 pl-3 pr-4 w-[38%] min-w-[280px] whitespace-nowrap">Course Track</th>
+                                <th className="pb-3 px-4 w-[20%] min-w-[150px] whitespace-nowrap">Category & Level</th>
+                                <th className="pb-3 px-4 w-[15%] min-w-[130px] whitespace-nowrap">Curriculum</th>
+                                <th className="pb-3 px-4 w-[12%] min-w-[110px] whitespace-nowrap">Status</th>
+                                <th className="pb-3 pl-4 pr-3 text-right w-[15%] min-w-[140px] whitespace-nowrap">Admin Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -94,29 +94,29 @@ const AdminCourseTable = ({ courses, token, onCourseDeleted }) => {
                                 const cId = c.documentId || c.id;
                                 return (
                                     <tr key={cId} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
-                                        <td className="py-4 pl-2">
+                                        <td className="py-4 pl-3 pr-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="relative w-14 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
                                                     <Image src={thumbnail} alt={c.title} fill className="object-cover" />
                                                 </div>
-                                                <div className="min-w-0 max-w-sm">
+                                                <div className="min-w-0 max-w-xs">
                                                     <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{c.title}</p>
                                                     <p className="text-[11px] text-slate-500 truncate">{c.shortDescription || c.description}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="py-4">
+                                        <td className="py-4 px-4 whitespace-nowrap">
                                             <span className="font-bold text-slate-700 dark:text-slate-300 block">{c.category || "Web Dev"}</span>
                                             <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400">{c.level || "Beginner"}</span>
                                         </td>
-                                        <td className="py-4 text-slate-600 dark:text-slate-400">
+                                        <td className="py-4 px-4 whitespace-nowrap text-slate-600 dark:text-slate-400">
                                             <span className="font-semibold text-slate-900 dark:text-white">{c.lessons?.length || 0} Lessons</span>
                                             <span className="text-[11px] text-slate-500 block">{c.quizzes?.length || 0} Quizzes</span>
                                         </td>
-                                        <td className="py-4">
+                                        <td className="py-4 px-4 whitespace-nowrap">
                                             <StatusBadge status={c.isPublished !== false ? "Published" : "Draft"} />
                                         </td>
-                                        <td className="py-4 pr-2 text-right">
+                                        <td className="py-4 pl-4 pr-3 text-right whitespace-nowrap">
                                             <div className="flex items-center justify-end gap-1.5">
                                                 <Link
                                                     href={`/courses/${c.slug}`}

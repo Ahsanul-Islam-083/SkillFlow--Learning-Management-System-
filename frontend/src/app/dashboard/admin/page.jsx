@@ -104,33 +104,33 @@ const AdminDashboard = () => {
       />
       <AlertBanner type={statusMessage.type} message={statusMessage.text} />
       {/* 3. Navigation Tabs */}
-      <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl w-fit">
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl w-full sm:w-fit overflow-x-auto">
         <button
           onClick={() => setActiveTab("users")}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${activeTab === "users"
+          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === "users"
               ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
         >
-          <Users className="w-4 h-4" /> Users & Roles ({users.length})
+          <Users className="w-4 h-4 flex-shrink-0" /> <span>Users & Roles ({users.length})</span>
         </button>
         <button
           onClick={() => setActiveTab("courses")}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${activeTab === "courses"
+          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === "courses"
               ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
         >
-          <BookOpen className="w-4 h-4" /> Courses & Lessons ({courses.length})
+          <BookOpen className="w-4 h-4 flex-shrink-0" /> <span>Courses & Lessons ({courses.length})</span>
         </button>
         <button
           onClick={() => setActiveTab("blogs")}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 ${activeTab === "blogs"
+          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === "blogs"
               ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
         >
-          <Newspaper className="w-4 h-4" /> Blog Posts ({blogs.length})
+          <Newspaper className="w-4 h-4 flex-shrink-0" /> <span>Blog Posts ({blogs.length})</span>
         </button>
       </div>
       {/* 4. Tab Views */}
