@@ -27,7 +27,8 @@ export default function ManagerDashboard() {
   useEffect(() => {
     async function loadPortalData() {
       try {
-        const blogsRes = await fetchAPI("/blogs?populate=*&sort=createdAt:desc", { token });
+        const blogsRes = await fetchAPI("/blogs?status=draft&populate=*&sort=createdAt:desc", { token });
+
         const blogList = Array.isArray(blogsRes?.data) ? blogsRes.data : Array.isArray(blogsRes) ? blogsRes : [];
         setBlogs(blogList);
 

@@ -33,7 +33,7 @@ const AdminDashboard = () => {
         fetchAPI("/users?populate=role", { token }),
         fetchAPI("/users-permissions/roles", { token }),
         fetchAPI("/courses?populate=*", { token }),
-        fetchAPI("/blogs?populate=*", { token }),
+        fetchAPI("/blogs?status=draft&populate=*", { token }),
         fetchAPI("/enrollments?populate=*", { token }),
       ]);
 
@@ -108,8 +108,8 @@ const AdminDashboard = () => {
         <button
           onClick={() => setActiveTab("users")}
           className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === "users"
-              ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
+            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
         >
           <Users className="w-4 h-4 flex-shrink-0" /> <span>Users & Roles ({users.length})</span>
@@ -117,8 +117,8 @@ const AdminDashboard = () => {
         <button
           onClick={() => setActiveTab("courses")}
           className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === "courses"
-              ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
+            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
         >
           <BookOpen className="w-4 h-4 flex-shrink-0" /> <span>Courses & Lessons ({courses.length})</span>
@@ -126,8 +126,8 @@ const AdminDashboard = () => {
         <button
           onClick={() => setActiveTab("blogs")}
           className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === "blogs"
-              ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm"
+            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
         >
           <Newspaper className="w-4 h-4 flex-shrink-0" /> <span>Blog Posts ({blogs.length})</span>

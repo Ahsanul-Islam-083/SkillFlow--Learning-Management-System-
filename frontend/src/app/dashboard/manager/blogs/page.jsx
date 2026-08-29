@@ -63,7 +63,7 @@ export default function BlogManagementStudio() {
   // Load all blogs
   const loadBlogs = async () => {
     try {
-      const res = await fetchAPI("/blogs?populate=*&sort=createdAt:desc", { token });
+      const res = await fetchAPI("/blogs?status=draft&populate=*&sort=createdAt:desc", { token });
       const list = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
       setBlogs(list);
     } catch (err) {
@@ -163,22 +163,25 @@ export default function BlogManagementStudio() {
         },
       };
 
+      const statusQuery = formData.isPublished ? "status=published" : "status=draft";
+
       if (editingBlog?.documentId || editingBlog?.id) {
         // Update existing blog
         const targetId = editingBlog.documentId || editingBlog.id;
-        await fetchAPI(`/blogs/${targetId}`, {
+        await fetchAPI(`/blogs/${targetId}?${statusQuery}`, {
           method: "PUT",
           token: token,
           body: blogPayload,
         });
       } else {
         // Create new blog
-        await fetchAPI("/blogs", {
+        await fetchAPI(`/blogs?${statusQuery}`, {
           method: "POST",
           token: token,
           body: blogPayload,
         });
       }
+
 
       await loadBlogs();
       setIsModalOpen(false);
@@ -272,7 +275,7 @@ export default function BlogManagementStudio() {
         {/* Filters and Search Bar */}
         <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            
+
             {/* Search Input */}
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -469,7 +472,7 @@ export default function BlogManagementStudio() {
 
             {/* Modal Body */}
             <form onSubmit={handleSaveBlog} className="p-6 overflow-y-auto space-y-6 flex-1">
-              
+
               <div className="space-y-4">
                 {/* Title */}
                 <div>
@@ -567,22 +570,20 @@ export default function BlogManagementStudio() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("edit")}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
-                          activeTab === "edit"
-                            ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm"
-                            : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                        }`}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition ${activeTab === "edit"
+                          ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm"
+                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                          }`}
                       >
                         Edit Markdown
                       </button>
                       <button
                         type="button"
                         onClick={() => setActiveTab("preview")}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
-                          activeTab === "preview"
-                            ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm"
-                            : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                        }`}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 ${activeTab === "preview"
+                          ? "bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm"
+                          : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                          }`}
                       >
                         <Eye className="w-3 h-3" /> Live Preview
                       </button>
@@ -658,10 +659,10 @@ export default function BlogManagementStudio() {
                     {submitting
                       ? "Saving Article..."
                       : editingBlog
-                      ? "Update Article"
-                      : formData.isPublished
-                      ? "Publish Article"
-                      : "Save Draft"}
+                        ? "Update Article"
+                        : formData.isPublished
+                          ? "Publish Article"
+                          : "Save Draft"}
                   </span>
                 </button>
               </div>
