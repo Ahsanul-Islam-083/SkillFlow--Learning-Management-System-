@@ -32,7 +32,6 @@
   - [3. Instructor Studio](#3-instructor-studio)
   - [4. Content Manager & Editorial Studio](#4-content-manager--editorial-studio)
   - [5. System Administrator Console](#5-system-administrator-console)
-- [🔐 Role-Based Access Control (RBAC) Matrix](#-role-based-access-control-rbac-matrix)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
 - [💻 Local Installation & Setup Guide](#-local-installation--setup-guide)
   - [Prerequisites](#prerequisites)
