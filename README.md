@@ -216,29 +216,6 @@ The central command center for enterprise administration:
 
 ---
 
-## 🔐 Role-Based Access Control (RBAC) Matrix
-
-| Feature / Capability | Public Visitor | Student | Instructor | Content Manager | Administrator |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Browse Courses & Blog Articles** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **View Free Preview Lessons** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **1-Click Course Enrollment** | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Watch Full Course Video Lessons** | ❌ | ✅ (Enrolled) | ✅ | ✅ | ✅ |
-| **Mark Lessons & Track Progress** | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Attempt Timed MCQ Quizzes** | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **View Personal Student Dashboard** | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Update Personal Profile / Password** | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Author & Publish Own Courses** | ❌ | ❌ | ✅ | ✅ | ✅ |
-| **Create & Attach Quizzes** | ❌ | ❌ | ✅ | ✅ | ✅ |
-| **View Enrolled Learners Progress** | ❌ | ❌ | ✅ (Own Courses) | ✅ (All Courses) | ✅ (All Courses) |
-| **Publish / Edit Tech Blogs** | ❌ | ❌ | ❌ | ✅ | ✅ |
-| **Govern & Edit All Courses** | ❌ | ❌ | ❌ | ✅ | ✅ |
-| **Assign & Change User Roles (RBAC)**| ❌ | ❌ | ❌ | ❌ | ✅ |
-| **Delete User Accounts** | ❌ | ❌ | ❌ | ❌ | ✅ |
-| **Access Strapi Admin CMS** | ❌ | ❌ | ❌ | ❌ | ✅ |
-
----
-
 ## 🛠️ Tech Stack & Architecture
 
 ### Frontend Architecture
