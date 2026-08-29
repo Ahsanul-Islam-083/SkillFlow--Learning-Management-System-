@@ -17,15 +17,12 @@ import {
   ExternalLink,
   Eye,
   FileEdit,
-  Clock,
   CheckCircle2,
   X,
   AlertCircle,
   Loader2,
   Newspaper,
-  Calendar,
-  Sparkles,
-  HelpCircle
+  RotateCcw
 } from "lucide-react";
 
 export default function BlogManagementStudio() {
@@ -60,7 +57,7 @@ export default function BlogManagementStudio() {
     isPublished: true,
   });
 
-  // Load all blogs
+  // Load all blogs (includes drafts for content studio)
   const loadBlogs = async () => {
     try {
       const res = await fetchAPI("/blogs?status=draft&populate=*&sort=createdAt:desc", { token });
@@ -126,7 +123,6 @@ export default function BlogManagementStudio() {
     setFormData((prev) => ({
       ...prev,
       title,
-      // only update slug if creating a new blog or if slug matches old auto-generated title
       slug: !editingBlog ? autoSlug : prev.slug,
     }));
   };
@@ -158,7 +154,6 @@ export default function BlogManagementStudio() {
           excerpt: formData.excerpt.trim(),
           content: formData.content,
           author: user?.id,
-          // Strapi draft & publish flag
           publishedAt: formData.isPublished ? new Date().toISOString() : null,
         },
       };
@@ -182,6 +177,10 @@ export default function BlogManagementStudio() {
         });
       }
 
+      // Reset filters so newly saved article is instantly visible
+      setSearchTerm("");
+      setCategoryFilter("All");
+      setStatusFilter("All");
 
       await loadBlogs();
       setIsModalOpen(false);
@@ -213,6 +212,13 @@ export default function BlogManagementStudio() {
     } finally {
       setDeleting(false);
     }
+  };
+
+  // Clear all active filters
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setCategoryFilter("All");
+    setStatusFilter("All");
   };
 
   // Filter & Search Logic
@@ -349,6 +355,13 @@ export default function BlogManagementStudio() {
                       "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop";
                     const isPub = !!blog.publishedAt;
 
+                    // Check ownership: Admins or the original Author can edit/delete
+                    const isAuthor =
+                      user?.role === "Admin" ||
+                      !blog.author ||
+                      blog.author?.id === user?.id ||
+                      blog.author?.documentId === user?.documentId;
+
                     return (
                       <tr
                         key={blog.documentId || blog.id}
@@ -398,23 +411,27 @@ export default function BlogManagementStudio() {
                               <ExternalLink className="w-4 h-4" />
                             </Link>
 
-                            {/* Edit Article */}
-                            <button
-                              onClick={() => handleOpenEditModal(blog)}
-                              title="Edit Article"
-                              className="p-2 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/50 transition"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
+                            {/* Edit Article (Only for Author/Admin) */}
+                            {isAuthor && (
+                              <button
+                                onClick={() => handleOpenEditModal(blog)}
+                                title="Edit Article"
+                                className="p-2 rounded-xl text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/50 transition"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                            )}
 
-                            {/* Delete Article */}
-                            <button
-                              onClick={() => setDeleteModalBlog(blog)}
-                              title="Delete Article"
-                              className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 transition"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                            {/* Delete Article (Only for Author/Admin) */}
+                            {isAuthor && (
+                              <button
+                                onClick={() => setDeleteModalBlog(blog)}
+                                title="Delete Article"
+                                className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 transition"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -424,14 +441,25 @@ export default function BlogManagementStudio() {
               </table>
             </div>
           ) : (
-            <div className="text-center py-16 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800">
-              <Newspaper className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                No articles match criteria
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Try clearing filters or search terms.
-              </p>
+            <div className="text-center py-16 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+              <Newspaper className="w-10 h-10 text-slate-400 mx-auto" />
+              <div>
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                  No articles match criteria
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Try clearing filters or search terms.
+                </p>
+              </div>
+
+              {(searchTerm || categoryFilter !== "All" || statusFilter !== "All") && (
+                <button
+                  onClick={handleClearFilters}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 shadow-sm transition"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Clear Filters
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -512,7 +540,7 @@ export default function BlogManagementStudio() {
                     <select
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="mt-1.5 w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs outline-none focus:ring-2 focus:ring-purple-500 transition"
+                      className="mt-1.5 w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-xs outline-none focus:ring-2 focus:ring-purple-500 transition"
                     >
                       <option value="Tutorials">Tutorials</option>
                       <option value="Web Development">Web Development</option>
@@ -558,7 +586,7 @@ export default function BlogManagementStudio() {
                   />
                 </div>
 
-                {/* Content Editor with Tab Navigation (Raw Markdown vs Live Formatted Preview) */}
+                {/* Content Editor with Tab Navigation */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
