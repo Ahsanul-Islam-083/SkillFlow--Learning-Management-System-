@@ -10,7 +10,14 @@ import { Clock, CheckCircle2, ArrowRight, Loader2, AlertCircle } from "lucide-re
 export default function LiveQuizPage() {
     const { slug, quizId } = useParams();
     const router = useRouter();
-    const { user, token } = useAuth();
+    const { user, role, token } = useAuth();
+
+    // Determine if the logged-in user is staff (Instructor, Content Manager, Admin)
+    const userRole = (role || "").toLowerCase();
+    const isStaff =
+        userRole.includes("admin") ||
+        userRole.includes("manager") ||
+        userRole.includes("instructor");
 
     const [quiz, setQuiz] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -40,15 +47,17 @@ export default function LiveQuizPage() {
         if (slug) loadQuizData();
     }, [slug, quizId]);
 
-    // 2. Countdown Timer
+    // 2. Countdown Timer (Only runs for Students; disabled for Instructor, Manager, and Admin)
     useEffect(() => {
+        if (isStaff) return; // Disable countdown timer for staff
+
         if (timeLeft <= 0) {
             handleSubmitQuiz();
             return;
         }
         const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
         return () => clearInterval(timer);
-    }, [timeLeft]);
+    }, [timeLeft, isStaff]);
 
     const questions = quiz?.questions || [];
 
@@ -58,7 +67,7 @@ export default function LiveQuizPage() {
 
     // 3. Grade Assessment & Persist to Strapi
     const handleSubmitQuiz = async () => {
-        if (submitting) return;
+        if (submitting || isStaff) return; // Disallow submission for staff
         setSubmitting(true);
 
         let correctCount = 0;
@@ -148,7 +157,11 @@ export default function LiveQuizPage() {
 
                     <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 font-mono font-bold text-xs sm:text-sm w-fit">
                         <Clock className="w-4 h-4" />
-                        <span>Time Remaining: {minutes}:{seconds < 10 ? `0${seconds}` : seconds}</span>
+                        <span>
+                            {isStaff
+                                ? "Timer Disabled (Staff Mode)"
+                                : `Time Remaining: ${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`}
+                        </span>
                     </div>
                 </div>
 
@@ -171,11 +184,10 @@ export default function LiveQuizPage() {
                                 <button
                                     key={optIdx}
                                     onClick={() => handleSelectOption(currentIndex, optIdx)}
-                                    className={`w-full p-4 rounded-2xl border text-left text-xs sm:text-sm font-semibold transition flex items-center justify-between ${
-                                        isSelected
+                                    className={`w-full p-4 rounded-2xl border text-left text-xs sm:text-sm font-semibold transition flex items-center justify-between ${isSelected
                                             ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300"
                                             : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200"
-                                    }`}
+                                        }`}
                                 >
                                     <span>{opt}</span>
                                     {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
@@ -200,6 +212,14 @@ export default function LiveQuizPage() {
                                 className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition flex items-center gap-1.5"
                             >
                                 Next Question <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                        ) : isStaff ? (
+                            <button
+                                disabled
+                                title="Staff members cannot submit quiz attempts"
+                                className="px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-bold text-xs cursor-not-allowed border border-slate-300 dark:border-slate-700 flex items-center gap-2"
+                            >
+                                <span>Submission Disabled (Staff Preview)</span>
                             </button>
                         ) : (
                             <button
